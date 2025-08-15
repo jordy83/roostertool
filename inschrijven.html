@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toetsinschrijving</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+  <!-- Header -->
+  <header class="bg-white shadow-md">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-blue-600">Toetsinschrijving</h1>
+      <button id="logoutBtn" class="text-red-600 hover:underline">Uitloggen</button>
+    </div>
+  </header>
+
+  <!-- Inschrijfformulier -->
+  <section class="py-12">
+    <div class="max-w-3xl mx-auto px-6 bg-white p-8 rounded shadow">
+      <h2 id="welkomHeader" class="text-2xl font-bold mb-6 text-center">Welkom leerling</h2>
+
+      <form id="herkansingForm">
+        <div class="mb-4">
+          <label for="studentName" class="block text-sm font-medium mb-1">Naam leerling</label>
+          <input type="text" id="studentName" name="studentName" readonly
+                 class="w-full bg-gray-100 border border-gray-300 px-4 py-2 rounded focus:outline-none" />
+        </div>
+
+        <div class="mb-4">
+          <label for="klas" class="block text-sm font-medium mb-1">Klas</label>
+          <input type="text" id="klas" name="klas" readonly
+                 class="w-full bg-gray-100 border border-gray-300 px-4 py-2 rounded focus:outline-none" />
+        </div>
+
+        <div class="mb-4">
+          <label for="toetsSelect" class="block text-sm font-medium mb-1">Selecteer toets</label>
+          <select id="toetsSelect" name="toetsSelect"
+                  class="w-full border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">-- Kies een toets --</option>
+          </select>
+        </div>
+
+        <button type="button" id="toevoegenBtn"
+                class="w-full bg-blue-600 text-white py-2 rounded-lg text-lg hover:bg-blue-700 mb-6">
+          Voeg toets toe
+        </button>
+
+        <div id="toetsOverzicht" class="mb-6">
+          <h3 class="text-lg font-semibold mb-2">Geselecteerde toetsen:</h3>
+          <ul id="toetsLijst" class="list-disc pl-5 text-gray-700"></ul>
+        </div>
+
+        <button type="submit"
+                class="w-full bg-green-600 text-white py-3 rounded-lg text-lg hover:bg-green-700">
+          Verzenden
+        </button>
+      </form>
+
+      <!-- Bevestiging -->
+      <div id="bevestiging" class="mt-6 hidden text-green-600 text-center font-semibold">
+        ✅ Je inschrijving is verzonden!
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t py-6 mt-12">
+    <div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-500">
+      © 2025 Toetsplanner. Gemaakt door Jordy.
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // Simuleer leerlinggegevens als test
+    const leerlingData = JSON.parse(localStorage.getItem('actieveLeerling') || '{}');
+    if (!leerlingData.naam || !leerlingData.klas) {
+      window.location.href = 'login.html';
+    }
+
+    document.getElementById('studentName').value = leerlingData.naam;
+    document.getElementById('klas').value = leerlingData.klas;
+    document.getElementById('welkomHeader').innerHTML = `Welkom <span class="text-blue-600">${leerlingData.naam}</span> uit klas <span class="text-blue-600">${leerlingData.klas}</span>`;
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('actieveLeerling');
+      window.location.href = 'index.html';
+    });
+
+    const geselecteerdeToetsen = [];
+    const toetsen = JSON.parse(localStorage.getItem('toetsen') || '[]');
+    const select = document.getElementById('toetsSelect');
+    const lijst = document.getElementById('toetsLijst');
+
+    toetsen.forEach(toets => {
+      if (toets.klas === leerlingData.klas) {
+        const optieWaarde = `${toets.titel} (${toets.klas} - ${toets.datum})`;
+        const option = document.createElement('option');
+        option.value = optieWaarde;
+        option.textContent = optieWaarde;
+        select.appendChild(option);
+      }
+    });
+
+    document.getElementById('toevoegenBtn').addEventListener('click', () => {
+      const gekozenToets = select.value;
+      if (!gekozenToets) return alert("⚠️ Kies eerst een toets.");
+      if (geselecteerdeToetsen.includes(gekozenToets)) return alert("⚠️ Deze toets is al geselecteerd.");
+      if (geselecteerdeToetsen.length >= 2) return alert("⚠️ Je mag maximaal 2 toetsen selecteren.");
+      geselecteerdeToetsen.push(gekozenToets);
+      updateToetsOverzicht();
+    });
+
+    function updateToetsOverzicht() {
+      lijst.innerHTML = '';
+      geselecteerdeToetsen.forEach(toets => {
+        const item = document.createElement('li');
+        item.innerHTML = `${toets} <button onclick="verwijderToets('${toets}')" class="text-red-600 ml-2 hover:underline">Verwijder</button>`;
+        lijst.appendChild(item);
+      });
+    }
+
+    function verwijderToets(toets) {
+      const index = geselecteerdeToetsen.indexOf(toets);
+      if (index > -1) {
+        geselecteerdeToetsen.splice(index, 1);
+        updateToetsOverzicht();
+      }
+    }
+
+    document.getElementById('herkansingForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      if (geselecteerdeToetsen.length === 0) {
+        alert("⚠️ Selecteer minstens één toets.");
+        return;
+      }
+
+      const nieuweInschrijving = {
+        naam: leerlingData.naam,
+        klas: leerlingData.klas,
+        toetsen: [...geselecteerdeToetsen]
+      };
+
+      const alleInschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
+      alleInschrijvingen.push(nieuweInschrijving);
+      localStorage.setItem('inschrijvingen', JSON.stringify(alleInschrijvingen));
+
+      document.getElementById('bevestiging').classList.remove('hidden');
+      this.reset();
+      geselecteerdeToetsen.length = 0;
+      updateToetsOverzicht();
+      select.selectedIndex = 0;
+
+      // ✅ Redirect na 1.5 seconden
+      setTimeout(() => {
+        window.location.href = 'Overzicht-inschrijving-leerling.html';
+      }, 1500);
+    });
+  </script>
+
+</body>
+</html>

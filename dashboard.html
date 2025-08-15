@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beheerdersdashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+  <!-- Header -->
+  <header class="bg-white shadow-md mb-8">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-blue-600">Beheerdersdashboard</h1>
+      <button onclick="window.location.href='index.html'" class="text-blue-600 hover:underline">Terug naar start</button>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 space-y-12">
+
+    <!-- Zoekfunctie -->
+    <section class="bg-white p-6 rounded shadow">
+      <h2 class="text-xl font-bold mb-4">🔍 Zoek leerlingaccount</h2>
+      <input type="text" id="zoekInput" placeholder="Typ een naam..."
+             class="w-full border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4" />
+      <ul id="accountLijst" class="list-disc pl-5 text-gray-700"></ul>
+    </section>
+
+    <!-- Toevoegen account -->
+    <section class="bg-white p-6 rounded shadow">
+      <h2 class="text-xl font-bold mb-4">➕ Voeg leerlingaccount toe</h2>
+      <form id="accountForm" class="space-y-4">
+        <input type="text" id="nieuweNaam" placeholder="Naam"
+               class="w-full border border-gray-300 px-4 py-2 rounded" />
+        <input type="text" id="nieuweKlas" placeholder="Klas"
+               class="w-full border border-gray-300 px-4 py-2 rounded" />
+        <input type="password" id="nieuwWachtwoord" placeholder="Wachtwoord"
+               class="w-full border border-gray-300 px-4 py-2 rounded" />
+        <button type="submit"
+                class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
+          Account toevoegen
+        </button>
+      </form>
+      <div id="toevoegFeedback" class="mt-4 text-green-600 font-semibold hidden">
+        ✅ Account toegevoegd.
+      </div>
+    </section>
+
+    <!-- Inschrijvingen overzicht -->
+    <section class="bg-white p-6 rounded shadow">
+      <h2 class="text-xl font-bold mb-4">📝 Inschrijvingen</h2>
+      <ul id="inschrijvingLijst" class="list-disc pl-5 text-gray-700 mb-4"></ul>
+      <button onclick="exportCSV()"
+              class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        📤 Exporteer inschrijvingen naar CSV
+      </button>
+    </section>
+
+    <!-- Statistieken -->
+    <section class="bg-white p-6 rounded shadow">
+      <h2 class="text-xl font-bold mb-4">📊 Toetsstatistieken</h2>
+      <ul id="statistiekLijst" class="list-disc pl-5 text-gray-700"></ul>
+    </section>
+
+    <!-- Resetknoppen -->
+    <section class="bg-white p-6 rounded shadow">
+      <h2 class="text-xl font-bold mb-4 text-red-600">⚠️ Gegevensbeheer</h2>
+      <div class="space-y-4">
+        <button onclick="resetAccounts()"
+                class="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700">
+          Verwijder alle leerlingaccounts
+        </button>
+        <button onclick="resetInschrijvingen()"
+                class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600">
+          Verwijder alle inschrijvingen
+        </button>
+        <button onclick="resetAlles()"
+                class="w-full bg-red-400 text-white py-2 rounded hover:bg-red-500">
+          Verwijder alles (accounts + inschrijvingen)
+        </button>
+      </div>
+      <div id="resetFeedback" class="mt-4 text-green-600 font-semibold hidden">
+        ✅ Gegevens zijn succesvol verwijderd.
+      </div>
+    </section>
+
+  </main>
+
+  <!-- JavaScript -->
+  <script>
+    const accountLijst = document.getElementById('accountLijst');
+    const inschrijvingLijst = document.getElementById('inschrijvingLijst');
+    const statistiekLijst = document.getElementById('statistiekLijst');
+    const zoekInput = document.getElementById('zoekInput');
+
+    function toonAccounts(filter = '') {
+      accountLijst.innerHTML = '';
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('account_')) {
+          const account = JSON.parse(localStorage.getItem(key));
+          if (account.naam.toLowerCase().includes(filter.toLowerCase())) {
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>${account.naam}</strong> uit klas <em>${account.klas}</em>`;
+            accountLijst.appendChild(li);
+          }
+        }
+      });
+    }
+
+    zoekInput.addEventListener('input', () => {
+      toonAccounts(zoekInput.value);
+    });
+
+    toonAccounts();
+
+    // Inschrijvingen
+    const inschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
+    const toetsTeller = {};
+
+    inschrijvingen.forEach(inschrijving => {
+      const li = document.createElement('li');
+      li.innerHTML = `<strong>${inschrijving.naam}</strong> (${inschrijving.klas}) heeft ingeschreven voor: <em>${inschrijving.toetsen.join(', ')}</em>`;
+      inschrijvingLijst.appendChild(li);
+
+      inschrijving.toetsen.forEach(toets => {
+        toetsTeller[toets] = (toetsTeller[toets] || 0) + 1;
+      });
+    });
+
+    Object.entries(toetsTeller).forEach(([toets, aantal]) => {
+      const li = document.createElement('li');
+      li.textContent = `${toets}: ${aantal} inschrijving(en)`;
+      statistiekLijst.appendChild(li);
+    });
+
+    // Account toevoegen
+    document.getElementById('accountForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const naam = document.getElementById('nieuweNaam').value.trim();
+      const klas = document.getElementById('nieuweKlas').value.trim();
+      const wachtwoord = document.getElementById('nieuwWachtwoord').value;
+
+      if (!naam || !klas || !wachtwoord) return alert("⚠️ Vul alle velden in.");
+
+      localStorage.setItem('account_' + naam, JSON.stringify({ naam, klas, wachtwoord }));
+      document.getElementById('toevoegFeedback').classList.remove('hidden');
+      setTimeout(() => location.reload(), 1500);
+    });
+
+    // CSV export
+    function exportCSV() {
+      let csv = "Naam,Klas,Toetsen\n";
+      inschrijvingen.forEach(i => {
+        csv += `"${i.naam}","${i.klas}","${i.toetsen.join('; ')}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'inschrijvingen.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Resetfuncties
+    function resetAccounts() {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('account_') || key === 'actieveLeerling') {
+          localStorage.removeItem(key);
+        }
+      });
+      showFeedback();
+    }
+
+    function resetInschrijvingen() {
+      localStorage.removeItem('inschrijvingen');
+      showFeedback();
+    }
+
+    function resetAlles() {
+      resetAccounts();
+      resetInschrijvingen();
+    }
+
+    function showFeedback() {
+      document.getElementById('resetFeedback').classList.remove('hidden');
+      setTimeout(() => location.reload(), 1500);
+    }
+  </script>
+
+</body>
+</html>
