@@ -12,6 +12,17 @@
     body {
       font-family: 'Inter', sans-serif;
     }
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800 antialiased">
@@ -40,9 +51,9 @@
               <input type="password" id="adminWachtwoord"
                     placeholder="Wachtwoord"
                     class="flex-1 border border-gray-300 px-3 py-2 rounded-l-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" />
-              <button onclick="loginAdmin()"
+              <button id="loginButton" onclick="loginAdmin()"
                       class="bg-blue-600 text-white px-4 py-2 rounded-r-md text-sm font-semibold hover:bg-blue-700 transition-colors duration-200 ease-in-out">
-                ➤
+                <span id="buttonText">➤</span>
               </button>
             </div>
           </div>
@@ -110,10 +121,4 @@
           </p>
         </div>
 
-                <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-2xl hover:border-blue-300 transform hover:-translate-y-1">
-          <div class="flex items-center justify-center h-16 w-16 bg-blue-100 rounded-full mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <h4 class="text-xl font-semibold
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-2xl hover:border-blue-300 transform hover:-translate-y-
