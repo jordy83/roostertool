@@ -14,6 +14,9 @@ Dashboard:
 	
 	Export  toetsoverzicht pdf (totaal)
 
+	Via dachboard kan coordinator wel gewoon lln inschrijven na deadline
+	Coordinator kan handmatig inschrijvingen sluiten.
+
 
 Accounts: Koppelen met school?
 	Leerling accounts aanmaken
@@ -22,6 +25,7 @@ Accounts: Koppelen met school?
 Leerling: na opnieuw inloggen krijgt weer overzicht van eerder gemaakte keuzes
 		Niet meer dan twee toetsen
 		Niet meerdere keren dezelfde toets
+Dealine toets niet niet te kiezen
 
 Deadline voor inschrijven toevoegen
 
@@ -114,3 +118,4 @@ _Totaal: ± 7 weken (flexibel afhankelijk van teamgrootte)_
 
 
 	
+
