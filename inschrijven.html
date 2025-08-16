@@ -123,11 +123,16 @@
                     const ingeschrevenDoor = toetsObject.ingeschrevenDoor || 'Leerling';
                     const li = document.createElement('li');
                     li.className = "flex justify-between items-center";
+                    let buttonHTML = '';
+                    if (ingeschrevenDoor === 'Leerling' && !isGlobaalGesloten) {
+                        buttonHTML = `<button onclick="verwijderInschrijving('${toetsTitel}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijder</button>`;
+                    } else if (ingeschrevenDoor === 'Coördinator') {
+                        buttonHTML = `<span class="text-sm text-gray-500">Alleen coördinator kan wijzigen</span>`;
+                    }
+                    
                     li.innerHTML = `
                         <span>• ${toetsTitel} <span class="text-sm text-gray-500">(${ingeschrevenDoor})</span></span>
-                        <button onclick="verwijderInschrijving('${toetsTitel}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors ${isGlobaalGesloten ? 'hidden' : ''}">
-                            Verwijder
-                        </button>
+                        ${buttonHTML}
                     `;
                     ingeschrevenLijst.appendChild(li);
                 });
@@ -175,10 +180,18 @@
                 alert("De inschrijvingen zijn gesloten, u kunt geen wijzigingen meer aanbrengen.");
                 return;
             }
+            
+            const alleInschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
+            const mijnInschrijving = alleInschrijvingen.find(i => i.naam === leerlingAccount.naam);
+            const toetsObject = mijnInschrijving ? mijnInschrijving.toetsen.find(t => t.titel === toetsTitel) : null;
+            
+            if (toetsObject && toetsObject.ingeschrevenDoor === 'Coördinator') {
+                alert("Deze inschrijving is gedaan door een coördinator en kan niet worden verwijderd.");
+                return;
+            }
 
             if (!confirm(`Weet je zeker dat je wilt uitschrijven voor ${toetsTitel}?`)) return;
 
-            const alleInschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
             const mijnInschrijvingIndex = alleInschrijvingen.findIndex(i => i.naam === leerlingAccount.naam);
 
             if (mijnInschrijvingIndex !== -1) {
