@@ -118,12 +118,14 @@
             
             ingeschrevenLijst.innerHTML = '';
             if (mijnIngeschrevenToetsen.length > 0) {
-                 mijnIngeschrevenToetsen.forEach(toets => {
+                 mijnIngeschrevenToetsen.forEach(toetsObject => {
+                    const toetsTitel = toetsObject.titel;
+                    const ingeschrevenDoor = toetsObject.ingeschrevenDoor || 'Leerling';
                     const li = document.createElement('li');
                     li.className = "flex justify-between items-center";
                     li.innerHTML = `
-                        <span>• ${toets}</span>
-                        <button onclick="verwijderInschrijving('${toets}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors ${isGlobaalGesloten ? 'hidden' : ''}">
+                        <span>• ${toetsTitel} <span class="text-sm text-gray-500">(${ingeschrevenDoor})</span></span>
+                        <button onclick="verwijderInschrijving('${toetsTitel}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors ${isGlobaalGesloten ? 'hidden' : ''}">
                             Verwijder
                         </button>
                     `;
@@ -140,7 +142,7 @@
             } else {
                 toetsenVoorKlas.forEach(toets => {
                     const toetsTitel = `${toets.vak} (${toets.toetsnr}) - ${toets.soort}`;
-                    const isIngeschreven = mijnIngeschrevenToetsen.includes(toetsTitel);
+                    const isIngeschreven = mijnIngeschrevenToetsen.some(t => t.titel === toetsTitel);
                     const isGesloten = isGlobaalGesloten || toets.gesloten || (toets.deadline && new Date(toets.deadline) < new Date());
                     
                     let statusMelding = '';
@@ -180,7 +182,7 @@
             const mijnInschrijvingIndex = alleInschrijvingen.findIndex(i => i.naam === leerlingAccount.naam);
 
             if (mijnInschrijvingIndex !== -1) {
-                const updatedToetsen = alleInschrijvingen[mijnInschrijvingIndex].toetsen.filter(toets => toets !== toetsTitel);
+                const updatedToetsen = alleInschrijvingen[mijnInschrijvingIndex].toetsen.filter(toetsObject => toetsObject.titel !== toetsTitel);
                 
                 if (updatedToetsen.length === 0) {
                      alleInschrijvingen.splice(mijnInschrijvingIndex, 1);
@@ -206,8 +208,8 @@
             const geselecteerdeCheckboxes = Array.from(document.querySelectorAll('input[name="toetsen"]:checked:not([disabled])'));
             
             const nieuweInschrijvingen = geselecteerdeCheckboxes
-                .filter(cb => !ingeschrevenToetsen.includes(cb.value))
-                .map(cb => cb.value);
+                .filter(cb => !ingeschrevenToetsen.some(t => t.titel === cb.value))
+                .map(cb => ({ titel: cb.value, ingeschrevenDoor: 'Leerling' }));
 
             if (ingeschrevenToetsen.length + nieuweInschrijvingen.length > 2) {
                 feedback.textContent = "⚠️ Je mag je voor maximaal twee toetsen inschrijven.";
@@ -221,7 +223,7 @@
             if (bestaandeInschrijvingIndex !== -1) {
                 const huidigeToetsen = alleInschrijvingen[bestaandeInschrijvingIndex].toetsen;
                 const nieuweLijst = [...huidigeToetsen, ...nieuweInschrijvingen];
-                alleInschrijvingen[bestaandeInschrijvingIndex].toetsen = [...new Set(nieuweLijst)]; // Verwijder duplicaten
+                alleInschrijvingen[bestaandeInschrijvingIndex].toetsen = nieuweLijst;
             } else {
                 alleInschrijvingen.push({
                     naam: leerlingAccount.naam,
