@@ -133,6 +133,14 @@
                 <h3 class="text-xl font-bold mb-4 text-gray-800">Aangemaakte toetsen:</h3>
                 <ul id="aangemaakteToetsenLijst" class="list-disc pl-5 text-gray-700 space-y-1"></ul>
             </div>
+            
+            <div class="mt-8 pt-8 border-t border-gray-200">
+                <h3 class="text-xl font-bold mb-4 text-gray-800">Globale instellingen</h3>
+                <div class="flex items-center space-x-4">
+                    <label for="globalInschrijvingen" class="flex-grow text-lg font-semibold">Inschrijvingen globaal sluiten voor leerlingen:</label>
+                    <input type="checkbox" id="globalInschrijvingen" class="h-6 w-6 text-blue-600 rounded focus:ring-blue-500">
+                </div>
+            </div>
 
             <div class="mt-8 pt-8 border-t border-red-200 text-center">
                  <h3 class="text-xl font-bold mb-4 text-red-600">Gevaarzone</h3>
@@ -233,9 +241,9 @@
         const statistiekLijst = document.getElementById('statistiekLijst');
         const zoekInput = document.getElementById('zoekInput');
         const aangemaakteToetsenLijst = document.getElementById('aangemaakteToetsenLijst');
-        
         const leerlingSelect = document.getElementById('leerlingSelect');
         const toetsSelect = document.getElementById('toetsSelect');
+        const globalInschrijvingenCheckbox = document.getElementById('globalInschrijvingen');
 
         // Functie voor tab navigatie
         let huidigeTab = 'accounts';
@@ -259,6 +267,11 @@
         // Initieel de eerste tab tonen
         document.addEventListener('DOMContentLoaded', () => {
             showTab('accounts');
+            globalInschrijvingenCheckbox.checked = JSON.parse(localStorage.getItem('globaleInschrijvingenGesloten') || 'false');
+        });
+
+        globalInschrijvingenCheckbox.addEventListener('change', () => {
+            localStorage.setItem('globaleInschrijvingenGesloten', globalInschrijvingenCheckbox.checked);
         });
 
         // Functie om accounts te tonen
@@ -332,6 +345,7 @@
                     li.innerHTML = `
                         <span><strong>${inschrijving.naam}</strong> (${inschrijving.klas}) heeft ingeschreven voor: <em>${inschrijving.toetsen.join(', ')}</em></span>
                         <div class="space-x-2 flex">
+                            <span class="text-sm text-gray-500">${inschrijving.ingeschrevenDoor || 'Leerling'}</span>
                             <button onclick="verwijderInschrijving(${index})" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijderen</button>
                         </div>
                     `;
@@ -508,10 +522,10 @@
 
         // CSV export
         function exportCSV() {
-            let csv = "Naam,Klas,Toetsen\n";
+            let csv = "Naam,Klas,Toetsen,Inschrijver\n";
             const inschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
             inschrijvingen.forEach(i => {
-                csv += `"${i.naam}","${i.klas}","${i.toetsen.join('; ')}"\n`;
+                csv += `"${i.naam}","${i.klas}","${i.toetsen.join('; ')}","${i.ingeschrevenDoor || 'Leerling'}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
@@ -672,6 +686,44 @@
                 localStorage.setItem('inschrijvingen', JSON.stringify(inschrijvingen));
                 toonInschrijvingen();
             }
+        }
+        
+        // Handmatig inschrijven door coördinator
+        function schrijfLeerlingIn() {
+            const geselecteerdeLeerling = leerlingSelect.value;
+            const geselecteerdeToets = toetsSelect.value;
+            
+            if (!geselecteerdeLeerling || !geselecteerdeToets) {
+                alert("⚠️ Selecteer een leerling én een toets.");
+                return;
+            }
+
+            const alleInschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
+            let leerlingInschrijving = alleInschrijvingen.find(i => i.naam === geselecteerdeLeerling);
+
+            if (leerlingInschrijving) {
+                if (leerlingInschrijving.toetsen.includes(geselecteerdeToets)) {
+                    alert("⚠️ Deze leerling is al ingeschreven voor deze toets.");
+                    return;
+                }
+                leerlingInschrijving.toetsen.push(geselecteerdeToets);
+                leerlingInschrijving.ingeschrevenDoor = 'Coördinator'; // Loggen wie de inschrijving doet
+            } else {
+                const leerlingData = JSON.parse(localStorage.getItem('account_' + geselecteerdeLeerling));
+                alleInschrijvingen.push({
+                    naam: leerlingData.naam,
+                    klas: leerlingData.klas,
+                    toetsen: [geselecteerdeToets],
+                    ingeschrevenDoor: 'Coördinator' // Loggen wie de inschrijving doet
+                });
+            }
+
+            localStorage.setItem('inschrijvingen', JSON.stringify(alleInschrijvingen));
+            document.getElementById('inschrijvingFeedback').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('inschrijvingFeedback').classList.add('hidden');
+                toonInschrijvingen();
+            }, 1500);
         }
 
         // --- Resetfuncties ---
