@@ -46,7 +46,7 @@
         <section class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
             <h2 class="text-xl font-bold text-gray-900 mb-6">Jouw inschrijvingen</h2>
             <p id="geenInschrijvingen" class="text-gray-500 hidden">Je bent nog niet ingeschreven voor een toets.</p>
-            <ul id="ingeschrevenLijst" class="space-y-2 text-gray-700"></ul>
+            <ul id="ingeschrevenLijst" class="space-y-4 text-gray-700"></ul>
         </section>
 
         <section class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
@@ -67,6 +67,19 @@
             </div>
         </section>
     </main>
+    
+    <div id="opmerkingModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 class="text-lg font-bold mb-4">Bewerk Opmerking</h3>
+            <input type="hidden" id="opmerkingModalToets">
+            <textarea id="opmerkingModalTekst" rows="4" class="w-full border border-gray-300 p-2 rounded-lg"></textarea>
+            <div class="flex justify-end space-x-4 mt-4">
+                <button type="button" onclick="document.getElementById('opmerkingModal').classList.add('hidden')" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400">Annuleren</button>
+                <button type="button" onclick="opslaanOpmerkingLeerling()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Opslaan</button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         const actieveLeerlingNaam = localStorage.getItem('actieveLeerling');
@@ -121,18 +134,40 @@
                  mijnIngeschrevenToetsen.forEach(toetsObject => {
                     const toetsTitel = toetsObject.titel;
                     const ingeschrevenDoor = toetsObject.ingeschrevenDoor || 'Leerling';
-                    const li = document.createElement('li');
-                    li.className = "flex justify-between items-center";
-                    let buttonHTML = '';
-                    if (ingeschrevenDoor === 'Leerling' && !isGlobaalGesloten) {
-                        buttonHTML = `<button onclick="verwijderInschrijving('${toetsTitel}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijder</button>`;
-                    } else if (ingeschrevenDoor === 'Coördinator') {
-                        buttonHTML = `<span class="text-sm text-gray-500">Alleen coördinator kan wijzigen</span>`;
+                    const opmerkingCoordinator = toetsObject.opmerkingen?.coordinator || '';
+                    const opmerkingLeerling = toetsObject.opmerkingen?.leerling || '';
+                    
+                    let opmerkingHTML = '';
+                    if (opmerkingCoordinator || opmerkingLeerling) {
+                        opmerkingHTML += `<div class="mt-2 text-sm text-gray-500 space-y-1">`;
+                        if (opmerkingCoordinator) {
+                            opmerkingHTML += `<div><strong>Opmerking Coördinator:</strong> ${opmerkingCoordinator}</div>`;
+                        }
+                        if (opmerkingLeerling) {
+                            opmerkingHTML += `<div><strong>Jouw opmerking:</strong> ${opmerkingLeerling}</div>`;
+                        }
+                        opmerkingHTML += `</div>`;
                     }
                     
+                    const li = document.createElement('li');
+                    li.className = "flex flex-col md:flex-row md:justify-between md:items-center p-4 bg-gray-100 rounded-md";
+                    
+                    let buttonHTML = '';
+                    if (ingeschrevenDoor === 'Leerling' && !isGlobaalGesloten) {
+                        buttonHTML = `<button onclick="verwijderInschrijving('${toetsTitel}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors mt-2 md:mt-0">Verwijder</button>`;
+                    }
+                    if (!isGlobaalGesloten) {
+                        buttonHTML += `<button onclick="bewerkOpmerkingLeerling('${toetsTitel}')" class="bg-indigo-500 text-white px-3 py-1 text-sm rounded-md hover:bg-indigo-600 transition-colors mt-2 md:mt-0 md:ml-2">✏️</button>`;
+                    }
+
                     li.innerHTML = `
-                        <span>• ${toetsTitel} <span class="text-sm text-gray-500">(${ingeschrevenDoor})</span></span>
-                        ${buttonHTML}
+                        <div class="flex-grow">
+                            <span>• <strong>${toetsTitel}</strong> <span class="text-sm text-gray-500">(${ingeschrevenDoor})</span></span>
+                            ${opmerkingHTML}
+                        </div>
+                        <div class="flex-shrink-0 mt-2 md:mt-0">
+                            ${buttonHTML}
+                        </div>
                     `;
                     ingeschrevenLijst.appendChild(li);
                 });
@@ -208,6 +243,37 @@
             }
         };
 
+        // Bewerken opmerkingen leerling
+        window.bewerkOpmerkingLeerling = function(toetsTitel) {
+            const alleInschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
+            const mijnInschrijving = alleInschrijvingen.find(i => i.naam === leerlingAccount.naam);
+            const toetsObject = mijnInschrijving?.toetsen.find(t => t.titel === toetsTitel);
+
+            if (!toetsObject) return;
+            
+            document.getElementById('opmerkingModalToets').value = toetsTitel;
+            document.getElementById('opmerkingModalTekst').value = toetsObject.opmerkingen?.leerling || '';
+            document.getElementById('opmerkingModal').classList.remove('hidden');
+        }
+        
+        function opslaanOpmerkingLeerling() {
+            const toetsTitel = document.getElementById('opmerkingModalToets').value;
+            const nieuweOpmerking = document.getElementById('opmerkingModalTekst').value;
+
+            const alleInschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
+            const mijnInschrijving = alleInschrijvingen.find(i => i.naam === leerlingAccount.naam);
+            const toetsObject = mijnInschrijving?.toetsen.find(t => t.titel === toetsTitel);
+            
+            if (toetsObject) {
+                if (!toetsObject.opmerkingen) toetsObject.opmerkingen = {};
+                toetsObject.opmerkingen.leerling = nieuweOpmerking;
+                localStorage.setItem('inschrijvingen', JSON.stringify(alleInschrijvingen));
+                document.getElementById('opmerkingModal').classList.add('hidden');
+                toonToetsen();
+            }
+        }
+
+
         inschrijfForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -222,7 +288,7 @@
             
             const nieuweInschrijvingen = geselecteerdeCheckboxes
                 .filter(cb => !ingeschrevenToetsen.some(t => t.titel === cb.value))
-                .map(cb => ({ titel: cb.value, ingeschrevenDoor: 'Leerling' }));
+                .map(cb => ({ titel: cb.value, ingeschrevenDoor: 'Leerling', opmerkingen: { coordinator: '', leerling: '' } }));
 
             if (ingeschrevenToetsen.length + nieuweInschrijvingen.length > 2) {
                 feedback.textContent = "⚠️ Je mag je voor maximaal twee toetsen inschrijven.";
