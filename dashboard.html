@@ -16,6 +16,24 @@
             cursor: pointer;
             user-select: none;
         }
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-pending {
+            background-color: #fcd34d;
+            color: #78350f;
+        }
+        .status-approved {
+            background-color: #86efac;
+            color: #166534;
+        }
+        .status-rejected {
+            background-color: #fca5a5;
+            color: #991b1b;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 antialiased">
@@ -170,6 +188,7 @@
                                     <th class="py-3 px-4 sortable-header" onclick="sorteerTabel('klas')">Klas</th>
                                     <th class="py-3 px-4 sortable-header" onclick="sorteerTabel('toets')">Toets</th>
                                     <th class="py-3 px-4 sortable-header" onclick="sorteerTabel('ingeschrevenDoor')">Ingeschreven door</th>
+                                    <th class="py-3 px-4">Status</th>
                                     <th class="py-3 px-4">Opmerking Coördinator</th>
                                     <th class="py-3 px-4">Opmerking Leerling</th>
                                     <th class="py-3 px-4">Acties</th>
@@ -391,6 +410,7 @@
                     const ingeschrevenDoor = toetsObject.ingeschrevenDoor || 'Leerling';
                     const opmerkingCoordinator = toetsObject.opmerkingen?.coordinator || '';
                     const opmerkingLeerling = toetsObject.opmerkingen?.leerling || '';
+                    const status = toetsObject.status || 'pending';
                     
                     losseInschrijvingen.push({
                         leerling: leerlingInschrijving.naam,
@@ -398,9 +418,13 @@
                         toets: toetsTitel,
                         ingeschrevenDoor: ingeschrevenDoor,
                         opmerkingCoordinator: opmerkingCoordinator,
-                        opmerkingLeerling: opmerkingLeerling
+                        opmerkingLeerling: opmerkingLeerling,
+                        status: status
                     });
-                    toetsTeller[toetsTitel] = (toetsTeller[toetsTitel] || 0) + 1;
+                    
+                    if (status === 'approved') {
+                        toetsTeller[toetsTitel] = (toetsTeller[toetsTitel] || 0) + 1;
+                    }
                 });
             });
 
@@ -422,6 +446,44 @@
             } else {
                 geenInschrijvingenText.classList.add('hidden');
                 gesorteerdeLijst.forEach((inschrijving, index) => {
+                    let statusBadgeClass = '';
+                    let statusText = '';
+                    let actiesHtml = '';
+
+                    switch (inschrijving.status) {
+                        case 'approved':
+                            statusBadgeClass = 'status-approved';
+                            statusText = 'Goedgekeurd';
+                            actiesHtml = `
+                                <button onclick="verwijderInschrijving('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">
+                                    Verwijder
+                                </button>
+                            `;
+                            break;
+                        case 'rejected':
+                            statusBadgeClass = 'status-rejected';
+                            statusText = 'Afgewezen';
+                            actiesHtml = `
+                                <button onclick="verwijderInschrijving('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">
+                                    Verwijder
+                                </button>
+                            `;
+                            break;
+                        case 'pending':
+                        default:
+                            statusBadgeClass = 'status-pending';
+                            statusText = 'In afwachting';
+                            actiesHtml = `
+                                <button onclick="keurInschrijvingGoed('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-green-500 text-white px-3 py-1 text-sm rounded-md hover:bg-green-600 transition-colors">
+                                    Goedkeuren
+                                </button>
+                                <button onclick="wijsInschrijvingAf('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">
+                                    Afwijzen
+                                </button>
+                            `;
+                            break;
+                    }
+
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-gray-50";
                     tr.innerHTML = `
@@ -429,16 +491,19 @@
                         <td class="py-3 px-4">${inschrijving.klas}</td>
                         <td class="py-3 px-4">${inschrijving.toets}</td>
                         <td class="py-3 px-4">${inschrijving.ingeschrevenDoor}</td>
-                        <td class="py-3 px-4 whitespace-pre-wrap">${inschrijving.opmerkingCoordinator}</td>
-                        <td class="py-3 px-4 whitespace-pre-wrap">${inschrijving.opmerkingLeerling}</td>
-                        <td class="py-3 px-4">
+                        <td class="py-3 px-4"><span class="status-badge ${statusBadgeClass}">${statusText}</span></td>
+                        <td class="py-3 px-4 whitespace-pre-wrap">
                             <div class="flex items-center space-x-2">
+                                <span>${inschrijving.opmerkingCoordinator}</span>
                                 <button onclick="bewerkOpmerkingCoordinator('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-indigo-500 text-white px-3 py-1 text-sm rounded-md hover:bg-indigo-600 transition-colors">
                                     ✏️
                                 </button>
-                                <button onclick="verwijderInschrijving('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">
-                                    Verwijder
-                                </button>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4 whitespace-pre-wrap">${inschrijving.opmerkingLeerling}</td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center space-x-2">
+                                ${actiesHtml}
                             </div>
                         </td>
                     `;
@@ -450,7 +515,7 @@
             statistiekLijst.innerHTML = '';
             Object.entries(toetsTeller).forEach(([toets, aantal]) => {
                 const li = document.createElement('li');
-                li.textContent = `${toets}: ${aantal} inschrijving(en)`;
+                li.textContent = `${toets}: ${aantal} goedgekeurde inschrijving(en)`;
                 statistiekLijst.appendChild(li);
             });
         }
@@ -506,7 +571,8 @@
                 opmerkingen: {
                     coordinator: opmerking,
                     leerling: ''
-                }
+                },
+                status: 'approved' // Handmatige inschrijvingen worden direct goedgekeurd
             };
 
             if (leerlingInschrijving) {
@@ -532,6 +598,28 @@
             }, 1500);
             inschrijvingOpmerkingCoordinator.value = '';
         }
+        
+        // Goedkeuren en afwijzen
+        function keurInschrijvingGoed(leerlingNaam, toetsTitel) {
+            updateInschrijvingsStatus(leerlingNaam, toetsTitel, 'approved');
+        }
+
+        function wijsInschrijvingAf(leerlingNaam, toetsTitel) {
+            updateInschrijvingsStatus(leerlingNaam, toetsTitel, 'rejected');
+        }
+
+        function updateInschrijvingsStatus(leerlingNaam, toetsTitel, status) {
+            const alleInschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
+            const leerlingInschrijving = alleInschrijvingen.find(i => i.naam === leerlingNaam);
+            const toetsObject = leerlingInschrijving?.toetsen.find(t => t.titel === toetsTitel);
+
+            if (toetsObject) {
+                toetsObject.status = status;
+                localStorage.setItem('inschrijvingen', JSON.stringify(alleInschrijvingen));
+                toonInschrijvingen();
+            }
+        }
+
 
         // Bewerken opmerkingen coördinator
         function bewerkOpmerkingCoordinator(leerlingNaam, toetsTitel) {
