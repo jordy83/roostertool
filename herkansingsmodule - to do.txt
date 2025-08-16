@@ -13,13 +13,8 @@ Dashboard:
 		aantal lokaal op basisi van aantal leerlingen
 
 	-	Statistieken per Leerling.
-
-	- Coordinator kan individeuel inschrijving verwijderen
 	
 	Export  toetsoverzicht pdf (totaal)
-
-	Via dachboard kan coordinator wel gewoon lln inschrijven na deadline
-	Coordinator kan handmatig inschrijvingen sluiten.
 
 	Toetsen aanpassen via dashboard werkt nog niet helemaal. klas gaat fout
 
@@ -27,13 +22,8 @@ Dashboard:
 Accounts: Koppelen met school?
 	Leerling accounts aanmaken
 	Admin accounts aanmaken (leco en rooster)
+	
 
-Leerling: na opnieuw inloggen krijgt weer overzicht van eerder gemaakte keuzes
-		Niet meer dan twee toetsen
-		Niet meerdere keren dezelfde toets
-	na Dealine toets niet niet te kiezen (werkt nog niet)
-
-Deadline voor inschrijven toevoegen
 
 Geweldig idee, Jordy! Je hebt al een solide front-end gebouwd, dus versie 2.0 kan zich richten op schaalbaarheid, veiligheid en gebruikersgemak. Hier is een uitgewerkt plan voor **Toetsplanner 2.0** — met backend-integratie, gebruikersbeheer en extra functionaliteit.
 
@@ -124,6 +114,7 @@ _Totaal: ± 7 weken (flexibel afhankelijk van teamgrootte)_
 
 
 	
+
 
 
 
