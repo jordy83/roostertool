@@ -15,6 +15,7 @@
             const input = document.getElementById('username').value.trim().toLowerCase();
             const wachtwoord = document.getElementById('password').value;
             const accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
+            // Zoek op naam of e-mail, type moet precies 'leerling' zijn
             const acc = accounts.find(a =>
                 a.type === "leerling" &&
                 (a.naam.toLowerCase() === input || a.email.toLowerCase() === input) &&
