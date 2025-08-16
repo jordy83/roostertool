@@ -12,6 +12,9 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+        .disabled-label {
+            color: #9CA3AF;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 antialiased">
@@ -50,9 +53,10 @@
             <h2 class="text-xl font-bold text-gray-900 mb-6">Beschikbare toetsen</h2>
             <form id="inschrijfForm" class="space-y-4">
                 <ul id="toetsenLijst" class="space-y-2 text-gray-700"></ul>
+                <div id="feedback" class="mt-4 text-red-600 font-semibold hidden"></div>
                 <button type="submit"
                         class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
-                    Inschrijvingen opslaan
+                    Inschrijven
                 </button>
             </form>
             <div id="opslagFeedback" class="mt-4 text-green-600 font-semibold hidden">
@@ -67,8 +71,8 @@
         const toetsenLijst = document.getElementById('toetsenLijst');
         const geenInschrijvingen = document.getElementById('geenInschrijvingen');
         const opslagFeedback = document.getElementById('opslagFeedback');
+        const feedback = document.getElementById('feedback');
         
-        // Controleer of er een actieve leerling is. Zo niet, stuur naar de inlogpagina.
         if (!actieveLeerlingNaam) {
             window.location.href = 'login.html';
         }
@@ -94,12 +98,17 @@
             const mijnIngeschrevenToetsen = laadInschrijvingen();
             toetsenLijst.innerHTML = '';
             
-            // Toon inschrijvingen in de aparte sectie
             ingeschrevenLijst.innerHTML = '';
             if (mijnIngeschrevenToetsen.length > 0) {
                  mijnIngeschrevenToetsen.forEach(toets => {
                     const li = document.createElement('li');
-                    li.textContent = `• ${toets}`;
+                    li.className = "flex justify-between items-center";
+                    li.innerHTML = `
+                        <span>• ${toets}</span>
+                        <button onclick="verwijderInschrijving('${toets}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">
+                            Verwijder
+                        </button>
+                    `;
                     ingeschrevenLijst.appendChild(li);
                 });
                 geenInschrijvingen.classList.add('hidden');
@@ -107,8 +116,6 @@
                 geenInschrijvingen.classList.remove('hidden');
             }
 
-
-            // Toon beschikbare toetsen met checkboxes
             const toetsenVoorKlas = beschikbareToetsen.filter(toets => toets.klas === leerlingAccount.klas);
             if (toetsenVoorKlas.length === 0) {
                 toetsenLijst.innerHTML = '<p class="text-gray-500">Geen toetsen beschikbaar voor jouw klas.</p>';
@@ -116,12 +123,16 @@
                 toetsenVoorKlas.forEach(toets => {
                     const toetsTitel = `${toets.vak} (${toets.toetsnr}) - ${toets.soort}`;
                     const isIngeschreven = mijnIngeschrevenToetsen.includes(toetsTitel);
-                    
+                    const isReedsVol = toetsenVolgeboekt(toetsTitel);
+                    const isNaDeadline = false; // Implementeer hier de deadline logica
+
                     const li = document.createElement('li');
                     li.innerHTML = `
-                        <label class="inline-flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" name="toetsen" value="${toetsTitel}" class="form-checkbox h-5 w-5 text-blue-600 rounded" ${isIngeschreven ? 'checked' : ''}>
-                            <span>${toetsTitel}</span>
+                        <label class="inline-flex items-center space-x-2 cursor-pointer ${isIngeschreven || isReedsVol || isNaDeadline ? 'disabled-label' : ''}">
+                            <input type="checkbox" name="toetsen" value="${toetsTitel}" 
+                                class="form-checkbox h-5 w-5 text-blue-600 rounded" 
+                                ${isIngeschreven || isReedsVol || isNaDeadline || mijnIngeschrevenToetsen.length >= 2 ? 'disabled' : ''}>
+                            <span>${toetsTitel} ${isReedsVol ? '(VOL)' : ''} ${isNaDeadline ? '(DEADLINE VERSTREKEN)' : ''}</span>
                         </label>
                     `;
                     toetsenLijst.appendChild(li);
@@ -129,17 +140,60 @@
             }
         }
         
+        function toetsenVolgeboekt(toetsTitel) {
+            const alleInschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
+            let inschrijvingenVoorToets = 0;
+            alleInschrijvingen.forEach(inschrijving => {
+                if (inschrijving.toetsen.includes(toetsTitel)) {
+                    inschrijvingenVoorToets++;
+                }
+            });
+            // HIER KAN DE LIMIET PER TOETS WORDEN INGESTELD
+            const inschrijfLimiet = 5; 
+            return inschrijvingenVoorToets >= inschrijfLimiet;
+        }
+
+        window.verwijderInschrijving = function(toetsTitel) {
+            if (!confirm(`Weet je zeker dat je wilt uitschrijven voor ${toetsTitel}?`)) return;
+
+            const alleInschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
+            const mijnInschrijvingIndex = alleInschrijvingen.findIndex(i => i.naam === leerlingAccount.naam);
+
+            if (mijnInschrijvingIndex !== -1) {
+                const updatedToetsen = alleInschrijvingen[mijnInschrijvingIndex].toetsen.filter(toets => toets !== toetsTitel);
+                alleInschrijvingen[mijnInschrijvingIndex].toetsen = updatedToetsen;
+                localStorage.setItem('inschrijvingen', JSON.stringify(alleInschrijvingen));
+                toonToetsen();
+            }
+        };
+
         document.getElementById('inschrijfForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const ingeschrevenToetsen = Array.from(document.querySelectorAll('input[name="toetsen"]:checked')).map(cb => cb.value);
+            const ingeschrevenToetsen = laadInschrijvingen();
+            const geselecteerdeCheckboxes = Array.from(document.querySelectorAll('input[name="toetsen"]:checked'));
             
+            if (geselecteerdeCheckboxes.length > 2) {
+                feedback.textContent = "⚠️ Je mag je voor maximaal twee toetsen inschrijven.";
+                feedback.classList.remove('hidden');
+                return;
+            }
+
+            const nieuweInschrijvingen = geselecteerdeCheckboxes.map(cb => cb.value);
+            const totaalGeselecteerd = ingeschrevenToetsen.length + nieuweInschrijvingen.length;
+
+            if (totaalGeselecteerd > 2) {
+                 feedback.textContent = "⚠️ Je bent al ingeschreven voor een toets. Je kunt nog één toets kiezen.";
+                 feedback.classList.remove('hidden');
+                 return;
+            }
+
             const alleInschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
             const bestaandeInschrijvingIndex = alleInschrijvingen.findIndex(i => i.naam === leerlingAccount.naam);
-
+            
             const nieuweInschrijving = {
                 naam: leerlingAccount.naam,
                 klas: leerlingAccount.klas,
-                toetsen: ingeschrevenToetsen
+                toetsen: [...ingeschrevenToetsen, ...nieuweInschrijvingen]
             };
 
             if (bestaandeInschrijvingIndex !== -1) {
@@ -150,13 +204,13 @@
             localStorage.setItem('inschrijvingen', JSON.stringify(alleInschrijvingen));
             
             opslagFeedback.classList.remove('hidden');
+            feedback.classList.add('hidden');
             setTimeout(() => {
                 opslagFeedback.classList.add('hidden');
                 toonToetsen();
             }, 1500);
         });
 
-        // Initialisatie
         toonToetsen();
     </script>
 </body>
