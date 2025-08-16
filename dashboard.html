@@ -8,7 +8,6 @@
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans">
 
-  <!-- Header -->
   <header class="bg-white shadow-md mb-8">
     <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
       <h1 class="text-2xl font-bold text-blue-600">Beheerdersdashboard</h1>
@@ -18,7 +17,6 @@
 
   <main class="max-w-6xl mx-auto px-6 space-y-12">
 
-    <!-- Zoekfunctie -->
     <section class="bg-white p-6 rounded shadow">
       <h2 class="text-xl font-bold mb-4">🔍 Zoek leerlingaccount</h2>
       <input type="text" id="zoekInput" placeholder="Typ een naam..."
@@ -26,7 +24,6 @@
       <ul id="accountLijst" class="list-disc pl-5 text-gray-700"></ul>
     </section>
 
-    <!-- Toevoegen account -->
     <section class="bg-white p-6 rounded shadow">
       <h2 class="text-xl font-bold mb-4">➕ Voeg leerlingaccount toe</h2>
       <form id="accountForm" class="space-y-4">
@@ -45,8 +42,44 @@
         ✅ Account toegevoegd.
       </div>
     </section>
+    
+    <section class="bg-white p-6 rounded shadow">
+      <h2 class="text-xl font-bold mb-4">✍️ Beheer Toetsen</h2>
+      
+      <form id="toetsForm" class="space-y-4">
+        <input type="text" id="toetsVak" placeholder="Vak (bijv. Wiskunde)" class="w-full border border-gray-300 px-4 py-2 rounded" />
+        <input type="text" id="toetsNr" placeholder="Toetsnummer (bijv. 2.1)" class="w-full border border-gray-300 px-4 py-2 rounded" />
+        <input type="text" id="toetsSoort" placeholder="Soort (bijv. Repetitie)" class="w-full border border-gray-300 px-4 py-2 rounded" />
+        <input type="text" id="toetsDuur" placeholder="Duur (bijv. 45 minuten)" class="w-full border border-gray-300 px-4 py-2 rounded" />
+        <input type="text" id="toetsKlas" placeholder="Klas (bijv. VWO 4)" class="w-full border border-gray-300 px-4 py-2 rounded" />
+        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+          Handmatig Toets Toevoegen
+        </button>
+      </form>
+      <div id="toetsFeedback" class="mt-4 text-green-600 font-semibold hidden">
+        ✅ Toets succesvol aangemaakt.
+      </div>
 
-    <!-- Inschrijvingen overzicht -->
+      <div class="mt-6 pt-6 border-t">
+        <h3 class="text-lg font-bold mb-2">Of importeer toetsen via CSV</h3>
+        <p class="text-sm text-gray-600 mb-4">Zorg dat het CSV-bestand de kopjes heeft: vak,toetsnr,soort,duur,klas</p>
+        <div class="flex items-center space-x-4">
+          <input type="file" id="csvFileInput" accept=".csv" class="flex-grow border rounded p-2">
+          <button id="importeerBtn" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+            📥 Importeer
+          </button>
+        </div>
+        <div id="importFeedback" class="mt-4 text-green-600 font-semibold hidden">
+           ✅ Toetsen succesvol geïmporteerd.
+        </div>
+      </div>
+
+      <div class="mt-6">
+        <h3 class="text-lg font-bold mb-2">Aangemaakte toetsen:</h3>
+        <ul id="aangemaakteToetsenLijst" class="list-disc pl-5 text-gray-700 space-y-1"></ul>
+      </div>
+    </section>
+
     <section class="bg-white p-6 rounded shadow">
       <h2 class="text-xl font-bold mb-4">📝 Inschrijvingen</h2>
       <ul id="inschrijvingLijst" class="list-disc pl-5 text-gray-700 mb-4"></ul>
@@ -56,13 +89,11 @@
       </button>
     </section>
 
-    <!-- Statistieken -->
     <section class="bg-white p-6 rounded shadow">
       <h2 class="text-xl font-bold mb-4">📊 Toetsstatistieken</h2>
       <ul id="statistiekLijst" class="list-disc pl-5 text-gray-700"></ul>
     </section>
 
-    <!-- Resetknoppen -->
     <section class="bg-white p-6 rounded shadow">
       <h2 class="text-xl font-bold mb-4 text-red-600">⚠️ Gegevensbeheer</h2>
       <div class="space-y-4">
@@ -74,9 +105,13 @@
                 class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600">
           Verwijder alle inschrijvingen
         </button>
+         <button onclick="resetToetsen()"
+                class="w-full bg-red-400 text-white py-2 rounded hover:bg-red-500">
+          Verwijder alle toetsen
+        </button>
         <button onclick="resetAlles()"
                 class="w-full bg-red-400 text-white py-2 rounded hover:bg-red-500">
-          Verwijder alles (accounts + inschrijvingen)
+          Verwijder alles (accounts + inschrijvingen + toetsen)
         </button>
       </div>
       <div id="resetFeedback" class="mt-4 text-green-600 font-semibold hidden">
@@ -86,13 +121,15 @@
 
   </main>
 
-  <!-- JavaScript -->
   <script>
+    // Bestaande DOM elementen
     const accountLijst = document.getElementById('accountLijst');
     const inschrijvingLijst = document.getElementById('inschrijvingLijst');
     const statistiekLijst = document.getElementById('statistiekLijst');
     const zoekInput = document.getElementById('zoekInput');
+    const aangemaakteToetsenLijst = document.getElementById('aangemaakteToetsenLijst');
 
+    // Functie om accounts te tonen
     function toonAccounts(filter = '') {
       accountLijst.innerHTML = '';
       Object.keys(localStorage).forEach(key => {
@@ -107,13 +144,26 @@
       });
     }
 
-    zoekInput.addEventListener('input', () => {
-      toonAccounts(zoekInput.value);
-    });
-
+    zoekInput.addEventListener('input', () => toonAccounts(zoekInput.value));
     toonAccounts();
 
-    // Inschrijvingen
+    // Functie om aangemaakte toetsen te tonen
+    function toonToetsen() {
+        const toetsen = JSON.parse(localStorage.getItem('toetsen') || '[]');
+        aangemaakteToetsenLijst.innerHTML = '';
+        if (toetsen.length === 0) {
+            aangemaakteToetsenLijst.innerHTML = '<li>Nog geen toetsen aangemaakt.</li>';
+        } else {
+            toetsen.forEach(toets => {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${toets.vak} (${toets.toetsnr})</strong> - ${toets.klas} (${toets.soort}, ${toets.duur})`;
+                aangemaakteToetsenLijst.appendChild(li);
+            });
+        }
+    }
+    toonToetsen();
+
+    // Inschrijvingen tonen
     const inschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
     const toetsTeller = {};
 
@@ -146,6 +196,86 @@
       document.getElementById('toevoegFeedback').classList.remove('hidden');
       setTimeout(() => location.reload(), 1500);
     });
+    
+    // Handmatig Toets toevoegen
+    document.getElementById('toetsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const vak = document.getElementById('toetsVak').value.trim();
+        const toetsnr = document.getElementById('toetsNr').value.trim();
+        const soort = document.getElementById('toetsSoort').value.trim();
+        const duur = document.getElementById('toetsDuur').value.trim();
+        const klas = document.getElementById('toetsKlas').value.trim();
+
+        if (!vak || !toetsnr || !soort || !duur || !klas) {
+            return alert("⚠️ Vul alle velden voor de toets in.");
+        }
+
+        const bestaandeToetsen = JSON.parse(localStorage.getItem('toetsen') || '[]');
+        const nieuweToets = { vak, toetsnr, soort, duur, klas };
+        bestaandeToetsen.push(nieuweToets);
+        localStorage.setItem('toetsen', JSON.stringify(bestaandeToetsen));
+
+        document.getElementById('toetsFeedback').classList.remove('hidden');
+        setTimeout(() => location.reload(), 1500);
+    });
+
+    // === NIEUW: CSV IMPORTEER FUNCTIONALITEIT ===
+    document.getElementById('importeerBtn').addEventListener('click', function() {
+      const fileInput = document.getElementById('csvFileInput');
+      if (fileInput.files.length === 0) {
+        alert('⚠️ Selecteer eerst een CSV-bestand om te importeren.');
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(event) {
+        const csvData = event.target.result;
+        const regels = csvData.split('\n').filter(regel => regel.trim() !== ''); // Filter lege regels
+        if (regels.length <= 1) {
+          alert('⚠️ CSV-bestand is leeg of bevat alleen een kopjesrij.');
+          return;
+        }
+
+        const headers = regels[0].trim().split(',');
+        const verwachteHeaders = ['vak', 'toetsnr', 'soort', 'duur', 'klas'];
+        // Controleer of alle verwachte headers aanwezig zijn
+        const heeftAlleHeaders = verwachteHeaders.every((h, i) => headers[i] && headers[i].trim() === h);
+        if (!heeftAlleHeaders) {
+            alert('⚠️ CSV-kopjes zijn onjuist. Vereist: vak,toetsnr,soort,duur,klas');
+            return;
+        }
+
+        const nieuweToetsen = [];
+        for (let i = 1; i < regels.length; i++) {
+          const data = regels[i].trim().split(',');
+          if (data.length === headers.length) {
+            const toets = {
+              vak: data[0].trim(),
+              toetsnr: data[1].trim(),
+              soort: data[2].trim(),
+              duur: data[3].trim(),
+              klas: data[4].trim()
+            };
+            nieuweToetsen.push(toets);
+          }
+        }
+        
+        const bestaandeToetsen = JSON.parse(localStorage.getItem('toetsen') || '[]');
+        const gecombineerdeToetsen = bestaandeToetsen.concat(nieuweToetsen);
+        localStorage.setItem('toetsen', JSON.stringify(gecombineerdeToetsen));
+
+        document.getElementById('importFeedback').classList.remove('hidden');
+        setTimeout(() => location.reload(), 1500);
+      };
+
+      reader.onerror = function() {
+        alert('⚠️ Er is een fout opgetreden bij het lezen van het bestand.');
+      };
+
+      reader.readAsText(file);
+    });
 
     // CSV export
     function exportCSV() {
@@ -164,6 +294,11 @@
     }
 
     // Resetfuncties
+    function showFeedback() {
+      document.getElementById('resetFeedback').classList.remove('hidden');
+      setTimeout(() => location.reload(), 1500);
+    }
+    
     function resetAccounts() {
       Object.keys(localStorage).forEach(key => {
         if (key.startsWith('account_') || key === 'actieveLeerling') {
@@ -177,15 +312,15 @@
       localStorage.removeItem('inschrijvingen');
       showFeedback();
     }
-
-    function resetAlles() {
-      resetAccounts();
-      resetInschrijvingen();
+    
+    function resetToetsen() {
+      localStorage.removeItem('toetsen');
+      showFeedback();
     }
 
-    function showFeedback() {
-      document.getElementById('resetFeedback').classList.remove('hidden');
-      setTimeout(() => location.reload(), 1500);
+    function resetAlles() {
+      localStorage.clear();
+      showFeedback();
     }
   </script>
 
