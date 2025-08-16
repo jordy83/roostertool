@@ -1,857 +1,564 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Beheeromgeving</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .status-badge {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            border-radius: 9999px;
-            text-transform: uppercase;
-        }
-        .status-pending {
-            background-color: #fcd34d; /* yellow-300 */
-            color: #78350f; /* amber-900 */
-        }
-        .status-approved {
-            background-color: #a7f3d0; /* green-200 */
-            color: #065f46; /* green-800 */
-        }
-        .status-rejected {
-            background-color: #fecaca; /* red-200 */
-            color: #991b1b; /* red-800 */
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Beheeromgeving</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            text-transform: uppercase;
+        }
+        .status-pending {
+            background-color: #fcd34d; /* yellow-300 */
+            color: #78350f; /* amber-900 */
+        }
+        .status-approved {
+            background-color: #a7f3d0; /* green-200 */
+            color: #065f46; /* green-800 */
+        }
+        .status-rejected {
+            background-color: #fecaca; /* red-200 */
+            color: #991b1b; /* red-800 */
+        }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-800 antialiased font-sans">
 
-    <div class="min-h-screen flex flex-col items-center py-10">
-        <div class="bg-white shadow-xl rounded-lg p-6 w-full max-w-7xl">
-            <h1 class="text-3xl font-bold text-center text-gray-900 mb-6">Administratief Dashboard</h1>
+    <div class="min-h-screen flex flex-col items-center py-10">
+        <div class="bg-white shadow-xl rounded-lg p-6 w-full max-w-7xl">
+            <h1 class="text-3xl font-bold text-center text-gray-900 mb-6">Administratief Dashboard</h1>
 
-            <div class="flex border-b border-gray-200 mb-6">
-                <button id="tab-accounts" onclick="showTab('accounts')" class="tab-link px-4 py-2 text-center text-sm font-medium leading-5 rounded-t-lg focus:outline-none transition-colors border-b-2 border-transparent hover:border-gray-300">
-                    Accounts
-                </button>
-                <button id="tab-toetsen" onclick="showTab('toetsen')" class="tab-link px-4 py-2 text-center text-sm font-medium leading-5 rounded-t-lg focus:outline-none transition-colors border-b-2 border-transparent hover:border-gray-300">
-                    Toetsen
-                </button>
-                <button id="tab-inschrijvingen" onclick="showTab('inschrijvingen')" class="tab-link px-4 py-2 text-center text-sm font-medium leading-5 rounded-t-lg focus:outline-none transition-colors border-b-2 border-transparent hover:border-gray-300">
-                    Inschrijvingen & Statistieken
-                </button>
-                <button id="tab-instellingen" onclick="showTab('instellingen')" class="tab-link px-4 py-2 text-center text-sm font-medium leading-5 rounded-t-lg focus:outline-none transition-colors border-b-2 border-transparent hover:border-gray-300">
-                    Instellingen
-                </button>
-            </div>
+            <div class="flex border-b border-gray-200 mb-6">
+                <button id="tab-accounts" onclick="showTab('accounts')" class="tab-link px-4 py-2 text-center text-sm font-medium leading-5 rounded-t-lg focus:outline-none transition-colors border-b-2 border-transparent hover:border-gray-300">
+                    Accounts
+                </button>
+                <button id="tab-toetsen" onclick="showTab('toetsen')" class="tab-link px-4 py-2 text-center text-sm font-medium leading-5 rounded-t-lg focus:outline-none transition-colors border-b-2 border-transparent hover:border-gray-300">
+                    Toetsen
+                </button>
+                <button id="tab-inschrijvingen" onclick="showTab('inschrijvingen')" class="tab-link px-4 py-2 text-center text-sm font-medium leading-5 rounded-t-lg focus:outline-none transition-colors border-b-2 border-transparent hover:border-gray-300">
+                    Inschrijvingen & Statistieken
+                </button>
+                <button id="tab-instellingen" onclick="showTab('instellingen')" class="tab-link px-4 py-2 text-center text-sm font-medium leading-5 rounded-t-lg focus:outline-none transition-colors border-b-2 border-transparent hover:border-gray-300">
+                    Instellingen
+                </button>
+            </div>
 
-            <div id="accounts" class="tab-content">
-                <div class="mb-6">
-                    <h2 class="text-xl font-semibold mb-4">Leerling Accounts</h2>
-                    <div class="mb-4">
-                        <input type="text" id="zoekInput" placeholder="Zoek op naam..." class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <ul id="accountLijst" class="space-y-4"></ul>
-                </div>
+            <div id="accounts" class="tab-content">
+                <div class="mb-6">
+                    <h2 class="text-xl font-semibold mb-4">Leerling Accounts</h2>
+                    <div class="mb-4">
+                        <input type="text" id="zoekInput" placeholder="Zoek op naam..." class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <ul id="accountLijst" class="space-y-4"></ul>
+                </div>
 
-                <div class="mb-6 border-t border-gray-200 pt-6">
-                    <h2 class="text-xl font-semibold mb-4">Nieuw Account Toevoegen</h2>
-                    <form id="accountForm" class="space-y-4">
-                        <input type="text" id="nieuweNaam" placeholder="Naam" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <input type="text" id="nieuweKlas" placeholder="Klas (bijv. 4H)" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <input type="email" id="nieuwEmail" placeholder="E-mail" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <input type="password" id="nieuwWachtwoord" placeholder="Wachtwoord" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">Account Toevoegen</button>
-                        <p id="toevoegFeedback" class="text-green-600 text-center mt-2 hidden">✅ Account toegevoegd.</p>
-                    </form>
-                </div>
+                <div class="mb-6 border-t border-gray-200 pt-6">
+                    <h2 class="text-xl font-semibold mb-4">Nieuw Account Toevoegen</h2>
+                    <form id="accountForm" class="space-y-4">
+                        <input type="text" id="nieuweNaam" placeholder="Naam" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="nieuweKlas" placeholder="Klas (bijv. 4H)" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="email" id="nieuwEmail" placeholder="E-mail" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="password" id="nieuwWachtwoord" placeholder="Wachtwoord" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">Account Toevoegen</button>
+                        <p id="toevoegFeedback" class="text-green-600 text-center mt-2 hidden">✅ Account toegevoegd.</p>
+                    </form>
+                </div>
 
-                <div class="border-t border-gray-200 pt-6 flex justify-between space-x-2">
-                    <button onclick="stuurWachtwoorden('geselecteerd')" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors flex-grow">Wachtwoorden geselecteerde accounts versturen</button>
-                    <button onclick="stuurWachtwoorden('alle')" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors flex-grow">Wachtwoorden alle accounts versturen</button>
-                    <button onclick="resetAccounts()" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors flex-grow">Alles Resetten</button>
-                </div>
-            </div>
+                <div class="border-t border-gray-200 pt-6 flex justify-between space-x-2">
+                    <button onclick="stuurWachtwoorden('geselecteerd')" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors flex-grow">Wachtwoorden geselecteerde accounts versturen</button>
+                    <button onclick="stuurWachtwoorden('alle')" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors flex-grow">Wachtwoorden alle accounts versturen</button>
+                    <button onclick="resetAccounts()" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors flex-grow">Alles Resetten</button>
+                </div>
+            </div>
 
-            <div id="toetsen" class="tab-content hidden">
-                <div class="mb-6">
-                    <h2 class="text-xl font-semibold mb-4">Aangemaakte Toetsen</h2>
-                    <ul id="aangemaakteToetsenLijst" class="space-y-4">
-                        <li>Nog geen toetsen aangemaakt.</li>
-                    </ul>
-                </div>
+            <div id="toetsen" class="tab-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-xl font-semibold mb-4">Aangemaakte Toetsen</h2>
+                    <ul id="aangemaakteToetsenLijst" class="space-y-4">
+                        <li>Nog geen toetsen aangemaakt.</li>
+                    </ul>
+                </div>
 
-                <div class="mb-6 border-t border-gray-200 pt-6">
-                    <h2 class="text-xl font-semibold mb-4">Nieuwe Toets Aanmaken</h2>
-                    <form id="toetsForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <input type="text" id="toetsVak" placeholder="Vak" required class="col-span-1 md:col-span-2 lg:col-span-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <input type="text" id="toetsNr" placeholder="Toetsnr." required class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <select id="toetsSoort" required class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">Soort toets</option>
-                            <option value="Herkansing">Herkansing</option>
-                            <option value="Eindtoets">Eindtoets</option>
-                            <option value="Repetitie">Repetitie</option>
-                        </select>
-                        <input type="text" id="toetsDuur" placeholder="Duur (minuten)" required class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <input type="text" id="toetsKlas" placeholder="Klas (bijv. 4H)" required class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <input type="datetime-local" id="toetsDeadline" class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <div class="flex items-center space-x-2">
-                            <input type="checkbox" id="toetsGesloten" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="toetsGesloten" class="text-sm font-medium text-gray-700">Gesloten voor inschrijvingen</label>
-                        </div>
-                        <button type="submit" class="col-span-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">Toets Aanmaken</button>
-                        <p id="toetsFeedback" class="text-green-600 text-center mt-2 hidden col-span-full">✅ Toets succesvol aangemaakt.</p>
-                    </form>
-                </div>
-                
-                <div class="border-t border-gray-200 pt-6 flex justify-between space-x-4 items-center">
-                    <div class="flex items-center space-x-2">
-                        <label for="csvFileInput" class="bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600 transition-colors cursor-pointer">Importeer CSV</label>
-                        <input type="file" id="csvFileInput" accept=".csv" class="hidden">
-                        <button id="importeerBtn" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors">Importeer</button>
-                    </div>
-                    <p id="importFeedback" class="text-green-600 text-center mt-2 hidden">✅ Toetsen succesvol geïmporteerd.</p>
-                    <button onclick="resetToetsen()" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors">Alles Resetten</button>
-                </div>
-            </div>
+                <div class="mb-6 border-t border-gray-200 pt-6">
+                    <h2 class="text-xl font-semibold mb-4">Nieuwe Toets Aanmaken</h2>
+                    <form id="toetsForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <input type="text" id="toetsVak" placeholder="Vak" required class="col-span-1 md:col-span-2 lg:col-span-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="toetsNr" placeholder="Toetsnr." required class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select id="toetsSoort" required class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Soort toets</option>
+                            <option value="Herkansing">Herkansing</option>
+                            <option value="Eindtoets">Eindtoets</option>
+                            <option value="Repetitie">Repetitie</option>
+                        </select>
+                        <input type="text" id="toetsDuur" placeholder="Duur (minuten)" required class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="toetsKlas" placeholder="Klas (bijv. 4H)" required class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="datetime-local" id="toetsDeadline" class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <div class="flex items-center space-x-2">
+                            <input type="checkbox" id="toetsGesloten" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="toetsGesloten" class="text-sm font-medium text-gray-700">Gesloten voor inschrijvingen</label>
+                        </div>
+                        <button type="submit" class="col-span-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">Toets Aanmaken</button>
+                        <p id="toetsFeedback" class="text-green-600 text-center mt-2 hidden col-span-full">✅ Toets succesvol aangemaakt.</p>
+                    </form>
+                </div>
+                
+                <div class="border-t border-gray-200 pt-6 flex justify-between space-x-4 items-center">
+                    <div class="flex items-center space-x-2">
+                        <label for="csvFileInput" class="bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600 transition-colors cursor-pointer">Importeer CSV</label>
+                        <input type="file" id="csvFileInput" accept=".csv" class="hidden">
+                        <button id="importeerBtn" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors">Importeer</button>
+                    </div>
+                    <p id="importFeedback" class="text-green-600 text-center mt-2 hidden">✅ Toetsen succesvol geïmporteerd.</p>
+                    <button onclick="resetToetsen()" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors">Alles Resetten</button>
+                </div>
+            </div>
 
-            <div id="inschrijvingen" class="tab-content hidden">
-                <div class="mb-6">
-                    <h2 class="text-xl font-semibold mb-4">Handmatig inschrijven</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-                        <div class="col-span-1">
-                            <label for="leerlingSelect" class="block text-sm font-medium text-gray-700">Selecteer Leerling</label>
-                            <select id="leerlingSelect" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"></select>
-                        </div>
-                        <div class="col-span-1">
-                            <label for="toetsSelect" class="block text-sm font-medium text-gray-700">Selecteer Toets</label>
-                            <select id="toetsSelect" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"></select>
-                        </div>
-                        <div class="col-span-1">
-                            <label for="inschrijvingOpmerkingCoordinator" class="block text-sm font-medium text-gray-700">Opmerking Coördinator</label>
-                            <input type="text" id="inschrijvingOpmerkingCoordinator" placeholder="Optionele opmerking" class="mt-1 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <button onclick="schrijfLeerlingIn()" class="col-span-1 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">Schrijf in</button>
-                    </div>
-                    <p id="inschrijvingFeedback" class="text-green-600 text-center mt-2 hidden">✅ Handmatige inschrijving succesvol.</p>
-                </div>
-                
-                <div class="mb-6">
-                    <h2 class="text-xl font-semibold mb-4">Alle inschrijvingen</h2>
-                    <table class="min-w-full bg-white border-collapse">
-                        <thead class="bg-gray-100">
-                            <tr>
-                                <th onclick="sorteerTabel('leerling')" class="py-3 px-4 text-left text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-200">Leerling</th>
-                                <th onclick="sorteerTabel('klas')" class="py-3 px-4 text-left text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-200">Klas</th>
-                                <th onclick="sorteerTabel('toets')" class="py-3 px-4 text-left text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-200">Toets</th>
-                                <th onclick="sorteerTabel('ingeschrevenDoor')" class="py-3 px-4 text-left text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-200">Ingeschreven door</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">Status</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">Opmerking Coördinator</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">Opmerking Leerling</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">Acties</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inschrijvingLijst" class="divide-y divide-gray-200"></tbody>
-                    </table>
-                    <p id="geenInschrijvingen" class="text-center text-gray-500 mt-4 hidden">Geen inschrijvingen gevonden.</p>
-                </div>
-                
-                <div class="mt-6 border-t border-gray-200 pt-6">
-                    <h2 class="text-xl font-semibold mb-4">Statistieken</h2>
-                    <ul id="statistiekLijst" class="space-y-2 text-gray-700"></ul>
-                </div>
+            <div id="inschrijvingen" class="tab-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-xl font-semibold mb-4">Handmatig inschrijven</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                        <div class="col-span-1">
+                            <label for="leerlingSelect" class="block text-sm font-medium text-gray-700">Selecteer Leerling</label>
+                            <select id="leerlingSelect" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"></select>
+                        </div>
+                        <div class="col-span-1">
+                            <label for="toetsSelect" class="block text-sm font-medium text-gray-700">Selecteer Toets</label>
+                            <select id="toetsSelect" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"></select>
+                        </div>
+                        <div class="col-span-1">
+                            <label for="inschrijvingOpmerkingCoordinator" class="block text-sm font-medium text-gray-700">Opmerking Coördinator</label>
+                            <input type="text" id="inschrijvingOpmerkingCoordinator" placeholder="Optionele opmerking" class="mt-1 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <button onclick="schrijfLeerlingIn()" class="col-span-1 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">Schrijf in</button>
+                    </div>
+                    <p id="inschrijvingFeedback" class="text-green-600 text-center mt-2 hidden">✅ Handmatige inschrijving succesvol.</p>
+                </div>
+                
+                <div class="mb-6">
+                    <h2 class="text-xl font-semibold mb-4">Alle inschrijvingen</h2>
+                    <table class="min-w-full bg-white border-collapse">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th onclick="sorteerTabel('leerling')" class="py-3 px-4 text-left text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-200">Leerling</th>
+                                <th onclick="sorteerTabel('klas')" class="py-3 px-4 text-left text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-200">Klas</th>
+                                <th onclick="sorteerTabel('toets')" class="py-3 px-4 text-left text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-200">Toets</th>
+                                <th onclick="sorteerTabel('ingeschrevenDoor')" class="py-3 px-4 text-left text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-200">Ingeschreven door</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">Status</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">Opmerking Coördinator</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">Opmerking Leerling</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">Acties</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inschrijvingLijst" class="divide-y divide-gray-200"></tbody>
+                    </table>
+                    <p id="geenInschrijvingen" class="text-center text-gray-500 mt-4 hidden">Geen inschrijvingen gevonden.</p>
+                </div>
+                
+                <div class="mt-6 border-t border-gray-200 pt-6">
+                    <h2 class="text-xl font-semibold mb-4">Statistieken</h2>
+                    <ul id="statistiekLijst" class="space-y-2 text-gray-700"></ul>
+                </div>
 
-                <div class="flex justify-between mt-6 border-t border-gray-200 pt-6 space-x-4">
-                    <button onclick="exportCSV()" class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors">Exporteer CSV</button>
-                    <button onclick="resetInschrijvingen()" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors">Alles Resetten</button>
-                </div>
-            </div>
+                <div class="flex justify-between mt-6 border-t border-gray-200 pt-6 space-x-4">
+                    <button onclick="exportCSV()" class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors">Exporteer CSV</button>
+                    <button onclick="resetInschrijvingen()" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors">Alles Resetten</button>
+                </div>
+            </div>
 
-            <div id="instellingen" class="tab-content hidden">
-                <h2 class="text-xl font-semibold mb-4">Globale Instellingen</h2>
-                <div class="flex items-center space-x-2">
-                    <input type="checkbox" id="globalInschrijvingen" onchange="slaGlobaleInstellingenOp()" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                    <label for="globalInschrijvingen" class="text-sm font-medium text-gray-700">Inschrijvingen sluiten voor alle leerlingen</label>
-                </div>
-            </div>
+            <div id="instellingen" class="tab-content hidden">
+                <h2 class="text-xl font-semibold mb-4">Globale Instellingen</h2>
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="globalInschrijvingen" onchange="slaGlobaleInstellingenOp()" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="globalInschrijvingen" class="text-sm font-medium text-gray-700">Inschrijvingen sluiten voor alle leerlingen</label>
+                </div>
+            </div>
 
-        </div>
-    </div>
+        </div>
+    </div>
 
-    <div id="accountModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-50">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-white rounded-lg p-6 w-full max-w-lg shadow-xl">
-                <div class="flex justify-between items-center pb-3">
-                    <h3 class="text-lg font-semibold text-gray-900">Account Bewerken</h3>
-                    <button onclick="document.getElementById('accountModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 focus:outline-none">&times;</button>
-                </div>
-                <form id="editAccountForm" class="space-y-4">
-                    <input type="text" id="editNaam" placeholder="Naam" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <input type="text" id="editKlas" placeholder="Klas" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <input type="email" id="editEmail" placeholder="E-mail" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <input type="password" id="editWachtwoord" placeholder="Nieuw wachtwoord (optioneel)" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">Opslaan</button>
-                </form>
-            </div>
-        </div>
-    </div>
-    
-    <div id="toetsModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-50">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-white rounded-lg p-6 w-full max-w-lg shadow-xl">
-                <div class="flex justify-between items-center pb-3">
-                    <h3 class="text-lg font-semibold text-gray-900">Toets Bewerken</h3>
-                    <button onclick="document.getElementById('toetsModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 focus:outline-none">&times;</button>
-                </div>
-                <form id="editToetsForm" class="space-y-4">
-                    <input type="text" id="editVak" placeholder="Vak" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <input type="text" id="editToetsnr" placeholder="Toetsnr." required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <select id="editSoort" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="Herkansing">Herkansing</option>
-                        <option value="Eindtoets">Eindtoets</option>
-                        <option value="Repetitie">Repetitie</option>
-                    </select>
-                    <input type="text" id="editDuur" placeholder="Duur (minuten)" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <input type="text" id="editKlas" placeholder="Klas (bijv. 4H)" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <input type="datetime-local" id="editDeadline" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <div class="flex items-center space-x-2">
-                        <input type="checkbox" id="editToetsGesloten" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                        <label for="editToetsGesloten" class="text-sm font-medium text-gray-700">Gesloten voor inschrijvingen</label>
-                    </div>
-                    <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">Opslaan</button>
-                </form>
-            </div>
-        </div>
-    </div>
-    
-    <div id="opmerkingModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-50">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-white rounded-lg p-6 w-full max-w-lg shadow-xl">
-                <div class="flex justify-between items-center pb-3">
-                    <h3 id="opmerkingModalTitel" class="text-lg font-semibold text-gray-900">Opmerking Bewerken</h3>
-                    <button onclick="document.getElementById('opmerkingModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 focus:outline-none">&times;</button>
-                </div>
-                <form id="editOpmerkingForm" class="space-y-4">
-                    <input type="hidden" id="opmerkingModalLeerling">
-                    <input type="hidden" id="opmerkingModalToets">
-                    <textarea id="opmerkingModalTekst" rows="4" placeholder="Opmerking" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                    <button type="button" onclick="opslaanOpmerkingCoordinator()" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">Opslaan</button>
-                </form>
-            </div>
-        </div>
-    </div>
+    <div id="accountModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg p-6 w-full max-w-lg shadow-xl">
+                <div class="flex justify-between items-center pb-3">
+                    <h3 class="text-lg font-semibold text-gray-900">Account Bewerken</h3>
+                    <button onclick="document.getElementById('accountModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 focus:outline-none">&times;</button>
+                </div>
+                <form id="editAccountForm" class="space-y-4">
+                    <input type="text" id="editNaam" placeholder="Naam" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="editKlas" placeholder="Klas" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="email" id="editEmail" placeholder="E-mail" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="password" id="editWachtwoord" placeholder="Nieuw wachtwoord (optioneel)" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">Opslaan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toetsModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg p-6 w-full max-w-lg shadow-xl">
+                <div class="flex justify-between items-center pb-3">
+                    <h3 class="text-lg font-semibold text-gray-900">Toets Bewerken</h3>
+                    <button onclick="document.getElementById('toetsModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 focus:outline-none">&times;</button>
+                </div>
+                <form id="editToetsForm" class="space-y-4">
+                    <input type="text" id="editVak" placeholder="Vak" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="editToetsnr" placeholder="Toetsnr." required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="editSoort" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="Herkansing">Herkansing</option>
+                        <option value="Eindtoets">Eindtoets</option>
+                        <option value="Repetitie">Repetitie</option>
+                    </select>
+                    <input type="text" id="editDuur" placeholder="Duur (minuten)" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="editKlas" placeholder="Klas (bijv. 4H)" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="datetime-local" id="editDeadline" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="flex items-center space-x-2">
+                        <input type="checkbox" id="editToetsGesloten" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="editToetsGesloten" class="text-sm font-medium text-gray-700">Gesloten voor inschrijvingen</label>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">Opslaan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="opmerkingModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg p-6 w-full max-w-lg shadow-xl">
+                <div class="flex justify-between items-center pb-3">
+                    <h3 id="opmerkingModalTitel" class="text-lg font-semibold text-gray-900">Opmerking Bewerken</h3>
+                    <button onclick="document.getElementById('opmerkingModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 focus:outline-none">&times;</button>
+                </div>
+                <form id="editOpmerkingForm" class="space-y-4">
+                    <input type="hidden" id="opmerkingModalLeerling">
+                    <input type="hidden" id="opmerkingModalToets">
+                    <textarea id="opmerkingModalTekst" rows="4" placeholder="Opmerking" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    <button type="button" onclick="opslaanOpmerkingCoordinator()" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">Opslaan</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
-    <script>
-        // Bestaande DOM elementen
-        const accountLijst = document.getElementById('accountLijst');
-        const inschrijvingLijst = document.getElementById('inschrijvingLijst');
-        const statistiekLijst = document.getElementById('statistiekLijst');
-        const zoekInput = document.getElementById('zoekInput');
-        const aangemaakteToetsenLijst = document.getElementById('aangemaakteToetsenLijst');
-        const leerlingSelect = document.getElementById('leerlingSelect');
-        const toetsSelect = document.getElementById('toetsSelect');
-        const globalInschrijvingenCheckbox = document.getElementById('globalInschrijvingen');
-        const geenInschrijvingenText = document.getElementById('geenInschrijvingen');
-        const inschrijvingOpmerkingCoordinator = document.getElementById('inschrijvingOpmerkingCoordinator');
-        
-        // Hulpfuncties om gegevens uit localStorage op te halen en op te slaan
-        function getFromLocalStorage(key, defaultValue = '[]') {
-            try {
-                return JSON.parse(localStorage.getItem(key) || defaultValue);
-            } catch (e) {
-                console.error(`Fout bij het parsen van localStorage-sleutel "${key}":`, e);
-                return JSON.parse(defaultValue);
-            }
-        }
+    <script>
+        // Bestaande DOM elementen
+        const accountLijst = document.getElementById('accountLijst');
+        const inschrijvingLijst = document.getElementById('inschrijvingLijst');
+        const statistiekLijst = document.getElementById('statistiekLijst');
+        const zoekInput = document.getElementById('zoekInput');
+        const aangemaakteToetsenLijst = document.getElementById('aangemaakteToetsenLijst');
+        const leerlingSelect = document.getElementById('leerlingSelect');
+        const toetsSelect = document.getElementById('toetsSelect');
+        const globalInschrijvingenCheckbox = document.getElementById('globalInschrijvingen');
+        const geenInschrijvingenText = document.getElementById('geenInschrijvingen');
+        const inschrijvingOpmerkingCoordinator = document.getElementById('inschrijvingOpmerkingCoordinator');
+        
+        // Hulpfuncties om gegevens uit localStorage op te halen en op te slaan
+        function getFromLocalStorage(key, defaultValue = '[]') {
+            try {
+                return JSON.parse(localStorage.getItem(key) || defaultValue);
+            } catch (e) {
+                console.error(`Fout bij het parsen van localStorage-sleutel "${key}":`, e);
+                return JSON.parse(defaultValue);
+            }
+        }
 
-        function saveToLocalStorage(key, data) {
-            localStorage.setItem(key, JSON.stringify(data));
-        }
+        function saveToLocalStorage(key, data) {
+            localStorage.setItem(key, JSON.stringify(data));
+        }
 
-        let sorteerRichting = {};
-        let huidigeTab = 'accounts';
+        let sorteerRichting = {};
+        let huidigeTab = 'accounts';
 
-        // Functie voor tab navigatie
-        function showTab(tabId) {
-            huidigeTab = tabId;
-            const tabs = document.querySelectorAll('.tab-content');
-            const tabLinks = document.querySelectorAll('.tab-link');
+        // Functie voor tab navigatie
+        function showTab(tabId) {
+            huidigeTab = tabId;
+            const tabs = document.querySelectorAll('.tab-content');
+            const tabLinks = document.querySelectorAll('.tab-link');
 
-            tabs.forEach(tab => tab.classList.add('hidden'));
-            tabLinks.forEach(link => link.classList.remove('border-blue-600', 'text-blue-600'));
+            tabs.forEach(tab => tab.classList.add('hidden'));
+            tabLinks.forEach(link => link.classList.remove('border-blue-600', 'text-blue-600'));
 
-            document.getElementById(tabId).classList.remove('hidden');
-            document.getElementById(`tab-${tabId}`).classList.add('border-blue-600', 'text-blue-600');
-            
-            if (tabId === 'accounts') {
-                toonAccounts();
-            } else if (tabId === 'toetsen') {
-                toonToetsen();
-            } else if (tabId === 'inschrijvingen') {
-                laadLeerlingenEnToetsen();
-                toonInschrijvingen();
-            }
-        }
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`).classList.add('border-blue-600', 'text-blue-600');
+            
+            if (tabId === 'accounts') {
+                toonAccounts();
+            } else if (tabId === 'toetsen') {
+                toonToetsen();
+            } else if (tabId === 'inschrijvingen') {
+                laadLeerlingenEnToetsen();
+                toonInschrijvingen();
+            }
+        }
 
-        // Initieel de eerste tab tonen
-        document.addEventListener('DOMContentLoaded', () => {
-            showTab('accounts');
-            globalInschrijvingenCheckbox.checked = getFromLocalStorage('globaleInschrijvingenGesloten', 'false');
-        });
+        // Initieel de eerste tab tonen
+        document.addEventListener('DOMContentLoaded', () => {
+            showTab('accounts');
+            globalInschrijvingenCheckbox.checked = getFromLocalStorage('globaleInschrijvingenGesloten', 'false');
+        });
 
-        // Functies voor accounts
-        function toonAccounts(filter = '') {
-            accountLijst.innerHTML = '';
-            const accounts = getFromLocalStorage('accounts');
-            const gefilterdeAccounts = accounts.filter(account => account.naam.toLowerCase().includes(filter.toLowerCase()));
+        // Functies voor accounts
+        function toonAccounts(filter = '') {
+            accountLijst.innerHTML = '';
+            const accounts = getFromLocalStorage('accounts');
+            const gefilterdeAccounts = accounts.filter(account => account.naam.toLowerCase().includes(filter.toLowerCase()));
 
-            gefilterdeAccounts.forEach(account => {
-                const li = document.createElement('li');
-                li.className = "flex justify-between items-center mb-2";
-                li.innerHTML = `
-                    <div class="flex items-center space-x-3">
-                        <input type="checkbox" data-account-email="${account.email}" class="account-checkbox h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                        <span>
-                            <strong>${account.naam}</strong> uit klas <em>${account.klas}</em>
-                            <br>
-                            <span class="text-sm text-gray-500">${account.email}</span>
-                        </span>
-                    </div>
-                    <div class="space-x-2 flex">
-                        <button onclick="resetWachtwoord('${account.email}')" class="bg-indigo-500 text-white px-3 py-1 text-sm rounded-md hover:bg-indigo-600 transition-colors">Wachtwoord resetten</button>
-                        <button onclick="bewerkAccount('${account.email}')" class="bg-yellow-500 text-white px-3 py-1 text-sm rounded-md hover:bg-yellow-600 transition-colors">Bewerken</button>
-                        <button onclick="verwijderAccount('${account.email}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijderen</button>
-                    </div>
-                `;
-                accountLijst.appendChild(li);
-            });
-        }
+            gefilterdeAccounts.forEach(account => {
+                const li = document.createElement('li');
+                li.className = "flex justify-between items-center mb-2";
+                li.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" data-account-email="${account.email}" class="account-checkbox h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <span>
+                            <strong>${account.naam}</strong> uit klas <em>${account.klas}</em>
+                            <br>
+                            <span class="text-sm text-gray-500">${account.email}</span>
+                        </span>
+                    </div>
+                    <div class="space-x-2 flex">
+                        <button onclick="resetWachtwoord('${account.email}')" class="bg-indigo-500 text-white px-3 py-1 text-sm rounded-md hover:bg-indigo-600 transition-colors">Wachtwoord resetten</button>
+                        <button onclick="bewerkAccount('${account.email}')" class="bg-yellow-500 text-white px-3 py-1 text-sm rounded-md hover:bg-yellow-600 transition-colors">Bewerken</button>
+                        <button onclick="verwijderAccount('${account.email}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijderen</button>
+                    </div>
+                `;
+                accountLijst.appendChild(li);
+            });
+        }
 
-        // Eventlistener voor de zoekbalk
-        zoekInput.addEventListener('input', () => toonAccounts(zoekInput.value));
+        // Eventlistener voor de zoekbalk
+        zoekInput.addEventListener('input', () => toonAccounts(zoekInput.value));
 
-        // Functie voor het toevoegen van een account
-        document.getElementById('accountForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const naam = document.getElementById('nieuweNaam').value;
-            const klas = document.getElementById('nieuweKlas').value;
-            const email = document.getElementById('nieuwEmail').value;
-            const wachtwoord = document.getElementById('nieuwWachtwoord').value;
-            
-            const accounts = getFromLocalStorage('accounts');
-            // Controleer op uniek e-mailadres
-            if (accounts.some(acc => acc.email === email)) {
-                alert("Er bestaat al een account met dit e-mailadres.");
-                return;
-            }
+        // Functie voor het toevoegen van een account
+        document.getElementById('accountForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const naam = document.getElementById('nieuweNaam').value;
+            const klas = document.getElementById('nieuweKlas').value;
+            const email = document.getElementById('nieuwEmail').value;
+            const wachtwoord = document.getElementById('nieuwWachtwoord').value;
+            
+            const accounts = getFromLocalStorage('accounts');
+            // Controleer op uniek e-mailadres
+            if (accounts.some(acc => acc.email === email)) {
+                alert("Er bestaat al een account met dit e-mailadres.");
+                return;
+            }
 
-            accounts.push({ naam, klas, email, wachtwoord });
-            saveToLocalStorage('accounts', accounts);
-            
-            toonAccounts();
-            document.getElementById('accountForm').reset();
-            const toevoegFeedback = document.getElementById('toevoegFeedback');
-            toevoegFeedback.textContent = '✅ Account toegevoegd.';
-            toevoegFeedback.classList.remove('hidden');
-            setTimeout(() => toevoegFeedback.classList.add('hidden'), 3000);
-        });
+            accounts.push({ naam, klas, email, wachtwoord });
+            saveToLocalStorage('accounts', accounts);
+            
+            toonAccounts();
+            document.getElementById('accountForm').reset();
+            const toevoegFeedback = document.getElementById('toevoegFeedback');
+            toevoegFeedback.textContent = '✅ Account toegevoegd.';
+            toevoegFeedback.classList.remove('hidden');
+            setTimeout(() => toevoegFeedback.classList.add('hidden'), 3000);
+        });
 
-        // Functie voor het bewerken van een account
-        function bewerkAccount(email) {
-            const accounts = getFromLocalStorage('accounts');
-            const account = accounts.find(acc => acc.email === email);
-            if (!account) return;
+        // Functie voor het bewerken van een account
+        function bewerkAccount(email) {
+            const accounts = getFromLocalStorage('accounts');
+            const account = accounts.find(acc => acc.email === email);
+            if (!account) return;
 
-            document.getElementById('editAccountForm').dataset.originalEmail = account.email;
-            document.getElementById('editNaam').value = account.naam;
-            document.getElementById('editKlas').value = account.klas;
-            document.getElementById('editEmail').value = account.email;
-            document.getElementById('editWachtwoord').value = '';
+            document.getElementById('editAccountForm').dataset.originalEmail = account.email;
+            document.getElementById('editNaam').value = account.naam;
+            document.getElementById('editKlas').value = account.klas;
+            document.getElementById('editEmail').value = account.email;
+            document.getElementById('editWachtwoord').value = '';
 
-            document.getElementById('accountModal').classList.remove('hidden');
-        }
+            document.getElementById('accountModal').classList.remove('hidden');
+        }
 
-        // Functie voor het opslaan van de bewerkte account
-        document.getElementById('editAccountForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const originalEmail = document.getElementById('editAccountForm').dataset.originalEmail;
-            const newNaam = document.getElementById('editNaam').value;
-            const newKlas = document.getElementById('editKlas').value;
-            const newEmail = document.getElementById('editEmail').value;
-            const newWachtwoord = document.getElementById('editWachtwoord').value;
-            
-            const accounts = getFromLocalStorage('accounts');
-            const index = accounts.findIndex(acc => acc.email === originalEmail);
+        // Functie voor het opslaan van de bewerkte account
+        document.getElementById('editAccountForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const originalEmail = document.getElementById('editAccountForm').dataset.originalEmail;
+            const newNaam = document.getElementById('editNaam').value;
+            const newKlas = document.getElementById('editKlas').value;
+            const newEmail = document.getElementById('editEmail').value;
+            const newWachtwoord = document.getElementById('editWachtwoord').value;
+            
+            const accounts = getFromLocalStorage('accounts');
+            const index = accounts.findIndex(acc => acc.email === originalEmail);
 
-            if (index !== -1) {
-                // Controleer op uniek e-mailadres bij het bewerken
-                if (newEmail !== originalEmail && accounts.some(acc => acc.email === newEmail)) {
-                    alert("Er bestaat al een account met dit e-mailadres.");
-                    return;
-                }
-                
-                accounts[index].naam = newNaam;
-                accounts[index].klas = newKlas;
-                accounts[index].email = newEmail;
-                if (newWachtwoord) {
-                    accounts[index].wachtwoord = newWachtwoord;
-                }
-                saveToLocalStorage('accounts', accounts);
-                toonAccounts();
-            }
-            
-            document.getElementById('accountModal').classList.add('hidden');
-        });
+            if (index !== -1) {
+                // Controleer op uniek e-mailadres bij het bewerken
+                if (newEmail !== originalEmail && accounts.some(acc => acc.email === newEmail)) {
+                    alert("Er bestaat al een account met dit e-mailadres.");
+                    return;
+                }
+                
+                accounts[index].naam = newNaam;
+                accounts[index].klas = newKlas;
+                accounts[index].email = newEmail;
+                if (newWachtwoord) {
+                    accounts[index].wachtwoord = newWachtwoord;
+                }
+                saveToLocalStorage('accounts', accounts);
+                toonAccounts();
+            }
+            
+            document.getElementById('accountModal').classList.add('hidden');
+        });
 
-        // Functie voor het verwijderen van een account
-        function verwijderAccount(email) {
-            if (confirm("Weet je zeker dat je dit account wilt verwijderen?")) {
-                let accounts = getFromLocalStorage('accounts');
-                accounts = accounts.filter(acc => acc.email !== email);
-                saveToLocalStorage('accounts', accounts);
-                toonAccounts();
-            }
-        }
+        // Functie voor het verwijderen van een account
+        function verwijderAccount(email) {
+            if (confirm("Weet je zeker dat je dit account wilt verwijderen?")) {
+                let accounts = getFromLocalStorage('accounts');
+                accounts = accounts.filter(acc => acc.email !== email);
+                saveToLocalStorage('accounts', accounts);
+                toonAccounts();
+            }
+        }
 
-        // Functie om alle accounts te verwijderen
-        function resetAccounts() {
-            if (confirm("Weet je zeker dat je ALLE leerlingaccounts wilt verwijderen? Dit kan niet ongedaan worden gemaakt.")) {
-                localStorage.removeItem('accounts');
-                toonAccounts();
-                alert("Alle accounts zijn verwijderd.");
-            }
-        }
-        
-        // Functie voor het versturen van wachtwoorden
-        function stuurWachtwoorden(type) {
-            const accounts = getFromLocalStorage('accounts');
-            let geselecteerdeEmails = [];
+        // Functie om alle accounts te verwijderen
+        function resetAccounts() {
+            if (confirm("Weet je zeker dat je ALLE leerlingaccounts wilt verwijderen? Dit kan niet ongedaan worden gemaakt.")) {
+                localStorage.removeItem('accounts');
+                toonAccounts();
+                alert("Alle accounts zijn verwijderd.");
+            }
+        }
+        
+        // Functie voor het versturen van wachtwoorden
+        function stuurWachtwoorden(type) {
+            const accounts = getFromLocalStorage('accounts');
+            let geselecteerdeEmails = [];
 
-            if (type === 'geselecteerd') {
-                document.querySelectorAll('.account-checkbox:checked').forEach(checkbox => {
-                    geselecteerdeEmails.push(checkbox.dataset.accountEmail);
-                });
-            } else {
-                geselecteerdeEmails = accounts.map(acc => acc.email);
-            }
-            
-            if (geselecteerdeEmails.length === 0) {
-                alert("Geen accounts geselecteerd.");
-                return;
-            }
-            
-            const accountsToSend = accounts.filter(acc => geselecteerdeEmails.includes(acc.email));
-            
-            let bericht = "Wachtwoorden verstuurd naar:\n\n";
-            accountsToSend.forEach(acc => {
-                bericht += `${acc.naam} (${acc.email}): ${acc.wachtwoord}\n`;
-            });
-            
-            alert(bericht);
-        }
+            if (type === 'geselecteerd') {
+                document.querySelectorAll('.account-checkbox:checked').forEach(checkbox => {
+                    geselecteerdeEmails.push(checkbox.dataset.accountEmail);
+                });
+            } else {
+                geselecteerdeEmails = accounts.map(acc => acc.email);
+            }
+            
+            if (geselecteerdeEmails.length === 0) {
+                alert("Geen accounts geselecteerd.");
+                return;
+            }
+            
+            const accountsToSend = accounts.filter(acc => geselecteerdeEmails.includes(acc.email));
+            
+            let bericht = "Wachtwoorden verstuurd naar:\n\n";
+            accountsToSend.forEach(acc => {
+                bericht += `${acc.naam} (${acc.email}): ${acc.wachtwoord}\n`;
+            });
+            
+            alert(bericht);
+        }
 
-        // Functies voor toetsen
-        function toonToetsen() {
-            const toetsen = getFromLocalStorage('toetsen');
-            aangemaakteToetsenLijst.innerHTML = '';
-            if (toetsen.length === 0) {
-                aangemaakteToetsenLijst.innerHTML = '<li>Nog geen toetsen aangemaakt.</li>';
-            } else {
-                toetsen.forEach((toets, index) => {
-                    const status = toets.gesloten ? "Gesloten" : "Open";
-                    const li = document.createElement('li');
-                    li.className = "flex justify-between items-center mb-2";
-                    li.innerHTML = `
-                        <span><strong>${toets.vak} (${toets.toetsnr})</strong> - ${toets.klas} (${toets.soort}, ${toets.duur}) | Deadline: ${toets.deadline ? new Date(toets.deadline).toLocaleString('nl-NL') : 'Geen'} | Status: ${status}</span>
-                        <div class="space-x-2 flex">
-                            <button onclick="bewerkToets(${index})" class="bg-yellow-500 text-white px-3 py-1 text-sm rounded-md hover:bg-yellow-600 transition-colors">Bewerken</button>
-                            <button onclick="verwijderToets(${index})" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijderen</button>
-                        </div>
-                    `;
-                    aangemaakteToetsenLijst.appendChild(li);
-                });
-            }
-        }
+        // Functies voor toetsen
+        function toonToetsen() {
+            const toetsen = getFromLocalStorage('toetsen');
+            aangemaakteToetsenLijst.innerHTML = '';
+            if (toetsen.length === 0) {
+                aangemaakteToetsenLijst.innerHTML = '<li>Nog geen toetsen aangemaakt.</li>';
+            } else {
+                toetsen.forEach((toets, index) => {
+                    const status = toets.gesloten ? "Gesloten" : "Open";
+                    const li = document.createElement('li');
+                    li.className = "flex justify-between items-center mb-2";
+                    li.innerHTML = `
+                        <span><strong>${toets.vak} (${toets.toetsnr})</strong> - ${toets.klas} (${toets.soort}, ${toets.duur}) | Deadline: ${toets.deadline ? new Date(toets.deadline).toLocaleString('nl-NL') : 'Geen'} | Status: ${status}</span>
+                        <div class="space-x-2 flex">
+                            <button onclick="bewerkToets(${index})" class="bg-yellow-500 text-white px-3 py-1 text-sm rounded-md hover:bg-yellow-600 transition-colors">Bewerken</button>
+                            <button onclick="verwijderToets(${index})" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijderen</button>
+                        </div>
+                    `;
+                    aangemaakteToetsenLijst.appendChild(li);
+                });
+            }
+        }
 
-        // Functie voor het toevoegen van een toets
-        document.getElementById('toetsForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const toets = {
-                vak: document.getElementById('toetsVak').value,
-                toetsnr: document.getElementById('toetsNr').value,
-                soort: document.getElementById('toetsSoort').value,
-                duur: document.getElementById('toetsDuur').value,
-                klas: document.getElementById('toetsKlas').value,
-                deadline: document.getElementById('toetsDeadline').value,
-                gesloten: document.getElementById('toetsGesloten').checked
-            };
-            const toetsen = getFromLocalStorage('toetsen');
-            toetsen.push(toets);
-            saveToLocalStorage('toetsen', toetsen);
-            toonToetsen();
-            document.getElementById('toetsForm').reset();
-            const toetsFeedback = document.getElementById('toetsFeedback');
-            toetsFeedback.classList.remove('hidden');
-            setTimeout(() => toetsFeedback.classList.add('hidden'), 3000);
-        });
+        // Functie voor het toevoegen van een toets
+        document.getElementById('toetsForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const toets = {
+                vak: document.getElementById('toetsVak').value,
+                toetsnr: document.getElementById('toetsNr').value,
+                soort: document.getElementById('toetsSoort').value,
+                duur: document.getElementById('toetsDuur').value,
+                klas: document.getElementById('toetsKlas').value,
+                deadline: document.getElementById('toetsDeadline').value,
+                gesloten: document.getElementById('toetsGesloten').checked
+            };
+            const toetsen = getFromLocalStorage('toetsen');
+            toetsen.push(toets);
+            saveToLocalStorage('toetsen', toetsen);
+            toonToetsen();
+            document.getElementById('toetsForm').reset();
+            const toetsFeedback = document.getElementById('toetsFeedback');
+            toetsFeedback.textContent = '✅ Toets succesvol aangemaakt.';
+            toetsFeedback.classList.remove('hidden');
+            setTimeout(() => toetsFeedback.classList.add('hidden'), 3000);
+        });
 
-        // Functie voor het bewerken van een toets
-        function bewerkToets(index) {
-            const toetsen = getFromLocalStorage('toetsen');
-            const toets = toetsen[index];
-            if (!toets) return;
+        // Functies voor inschrijvingen
+        function toonInschrijvingen() {
+            inschrijvingLijst.innerHTML = '';
+            const inschrijvingen = getFromLocalStorage('inschrijvingen');
+            if (inschrijvingen.length === 0) {
+                geenInschrijvingenText.classList.remove('hidden');
+                return;
+            }
+            geenInschrijvingenText.classList.add('hidden');
+            
+            inschrijvingen.forEach(inschrijving => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-100 transition-colors duration-200";
+                const statusBadgeClass = inschrijving.status ? `status-${inschrijving.status}` : 'status-pending';
+                const statusText = inschrijving.status ? inschrijving.status : 'pending';
 
-            document.getElementById('editToetsForm').dataset.index = index;
-            document.getElementById('editVak').value = toets.vak;
-            document.getElementById('editToetsnr').value = toets.toetsnr;
-            document.getElementById('editSoort').value = toets.soort;
-            document.getElementById('editDuur').value = toets.duur;
-            document.getElementById('editKlas').value = toets.klas;
-            document.getElementById('editDeadline').value = toets.deadline;
-            document.getElementById('editToetsGesloten').checked = toets.gesloten;
+                tr.innerHTML = `
+                    <td class="py-3 px-4 whitespace-nowrap">${inschrijving.leerling.naam}</td>
+                    <td class="py-3 px-4 whitespace-nowrap">${inschrijving.leerling.klas}</td>
+                    <td class="py-3 px-4 whitespace-nowrap">${inschrijving.toets.vak} (${inschrijving.toets.toetsnr})</td>
+                    <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-500">${inschrijving.ingeschrevenDoor}</td>
+                    <td class="py-3 px-4 whitespace-nowrap">
+                        <select onchange="updateStatus('${inschrijving.leerling.email}', '${inschrijving.toets.vak}-${inschrijving.toets.toetsnr}', this.value)" class="bg-transparent border rounded-md px-2 py-1 text-xs font-semibold">
+                            <option value="pending" ${statusText === 'pending' ? 'selected' : ''}>In afwachting</option>
+                            <option value="approved" ${statusText === 'approved' ? 'selected' : ''}>Goedgekeurd</option>
+                            <option value="rejected" ${statusText === 'rejected' ? 'selected' : ''}>Afgewezen</option>
+                        </select>
+                    </td>
+                    <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-500">${inschrijving.opmerkingCoordinator || ''}</td>
+                    <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-500">${inschrijving.opmerkingLeerling || ''}</td>
+                    <td class="py-3 px-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                        <button onclick="verwijderInschrijving('${inschrijving.leerling.email}', '${inschrijving.toets.vak}-${inschrijving.toets.toetsnr}')" class="text-red-600 hover:text-red-900 transition-colors">Verwijderen</button>
+                    </td>
+                `;
+                inschrijvingLijst.appendChild(tr);
+            });
+            toonStatistieken();
+        }
 
-            document.getElementById('toetsModal').classList.remove('hidden');
-        }
+        // Functie om de status van een inschrijving bij te werken
+        function updateStatus(leerlingEmail, toetsId, newStatus) {
+            let inschrijvingen = getFromLocalStorage('inschrijvingen');
+            const toetsen = getFromLocalStorage('toetsen');
+            const [toetsVak, toetsNr] = toetsId.split('-');
 
-        // Functie voor het opslaan van bewerkte toets
-        document.getElementById('editToetsForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const index = document.getElementById('editToetsForm').dataset.index;
-            const toetsen = getFromLocalStorage('toetsen');
-            
-            toetsen[index].vak = document.getElementById('editVak').value;
-            toetsen[index].toetsnr = document.getElementById('editToetsnr').value;
-            toetsen[index].soort = document.getElementById('editSoort').value;
-            toetsen[index].duur = document.getElementById('editDuur').value;
-            toetsen[index].klas = document.getElementById('editKlas').value;
-            toetsen[index].deadline = document.getElementById('editDeadline').value;
-            toetsen[index].gesloten = document.getElementById('editToetsGesloten').checked;
-            
-            saveToLocalStorage('toetsen', toetsen);
-            toonToetsen();
-            document.getElementById('toetsModal').classList.add('hidden');
-        });
+            const index = inschrijvingen.findIndex(ins => 
+                ins.leerling.email === leerlingEmail && 
+                ins.toets.vak === toetsVak &&
+                ins.toets.toetsnr === toetsNr
+            );
 
-        // Functie voor het verwijderen van een toets
-        function verwijderToets(index) {
-            if (confirm("Weet je zeker dat je deze toets wilt verwijderen?")) {
-                let toetsen = getFromLocalStorage('toetsen');
-                toetsen.splice(index, 1);
-                saveToLocalStorage('toetsen', toetsen);
-                toonToetsen();
-            }
-        }
+            if (index !== -1) {
+                inschrijvingen[index].status = newStatus;
+                saveToLocalStorage('inschrijvingen', inschrijvingen);
+                toonInschrijvingen(); // Herlaad de tabel om de status-badge bij te werken
+                alert(`Status voor ${inschrijvingen[index].leerling.naam} is nu: ${newStatus}`);
+            }
+        }
 
-        // Functie om alle toetsen te verwijderen
-        function resetToetsen() {
-            if (confirm("Weet je zeker dat je ALLE toetsen wilt verwijderen? Dit kan niet ongedaan worden gemaakt.")) {
-                localStorage.removeItem('toetsen');
-                toonToetsen();
-                alert("Alle toetsen zijn verwijderd.");
-            }
-        }
-
-        // CSV importeer logica
-        document.getElementById('importeerBtn').addEventListener('click', () => {
-            document.getElementById('csvFileInput').click();
-        });
-
-        document.getElementById('csvFileInput').addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const text = e.target.result;
-                    processCSV(text);
-                };
-                reader.readAsText(file);
-            }
-        });
-
-        function processCSV(csvText) {
-            const lines = csvText.split('\n').filter(line => line.trim() !== '');
-            const headers = lines[0].split(';');
-            const newToetsen = lines.slice(1).map(line => {
-                const values = line.split(';');
-                const toets = {};
-                headers.forEach((header, i) => {
-                    toets[header.trim()] = values[i].trim();
-                });
-                return toets;
-            });
-            const existingToetsen = getFromLocalStorage('toetsen');
-            saveToLocalStorage('toetsen', [...existingToetsen, ...newToetsen]);
-            toonToetsen();
-            const importFeedback = document.getElementById('importFeedback');
-            importFeedback.classList.remove('hidden');
-            setTimeout(() => importFeedback.classList.add('hidden'), 3000);
-        }
-
-        // Functies voor inschrijvingen en statistieken
-        function laadLeerlingenEnToetsen() {
-            const accounts = getFromLocalStorage('accounts');
-            const toetsen = getFromLocalStorage('toetsen');
-
-            leerlingSelect.innerHTML = '<option value="">-- Selecteer een leerling --</option>';
-            accounts.forEach(account => {
-                const option = document.createElement('option');
-                option.value = account.email;
-                option.textContent = `${account.naam} (${account.klas})`;
-                leerlingSelect.appendChild(option);
-            });
-
-            toetsSelect.innerHTML = '<option value="">-- Selecteer een toets --</option>';
-            toetsen.forEach(toets => {
-                const option = document.createElement('option');
-                option.value = `${toets.vak} (${toets.toetsnr})`;
-                option.textContent = `${toets.vak} (${toets.toetsnr})`;
-                toetsSelect.appendChild(option);
-            });
-        }
-
-        function schrijfLeerlingIn() {
-            const leerlingEmail = leerlingSelect.value;
-            const toetsTitel = toetsSelect.value;
-            const opmerkingCoordinator = inschrijvingOpmerkingCoordinator.value;
-
-            if (!leerlingEmail || !toetsTitel) {
-                alert("Selecteer een leerling en een toets.");
-                return;
-            }
-
-            let inschrijvingen = getFromLocalStorage('inschrijvingen');
-            let leerlingInschrijving = inschrijvingen.find(i => i.email === leerlingEmail);
-
-            if (!leerlingInschrijving) {
-                const account = getFromLocalStorage('accounts').find(acc => acc.email === leerlingEmail);
-                leerlingInschrijving = {
-                    naam: account.naam,
-                    klas: account.klas,
-                    email: leerlingEmail,
-                    toetsen: []
-                };
-                inschrijvingen.push(leerlingInschrijving);
-            }
-
-            const isAlIngeschreven = leerlingInschrijving.toetsen.some(t => t.titel === toetsTitel);
-            if (isAlIngeschreven) {
-                alert("Deze leerling is al ingeschreven voor deze toets.");
-                return;
-            }
-            
-            leerlingInschrijving.toetsen.push({
-                titel: toetsTitel,
-                ingeschrevenDoor: 'Coördinator',
-                status: 'approved', // Standaard goedgekeurd bij handmatige inschrijving
-                opmerkingen: {
-                    coordinator: opmerkingCoordinator,
-                    leerling: ''
-                }
-            });
-
-            saveToLocalStorage('inschrijvingen', inschrijvingen);
-            toonInschrijvingen();
-            leerlingSelect.value = '';
-            toetsSelect.value = '';
-            inschrijvingOpmerkingCoordinator.value = '';
-            const inschrijvingFeedback = document.getElementById('inschrijvingFeedback');
-            inschrijvingFeedback.classList.remove('hidden');
-            setTimeout(() => inschrijvingFeedback.classList.add('hidden'), 3000);
-        }
-
-        function toonInschrijvingen() {
-            const inschrijvingen = getFromLocalStorage('inschrijvingen');
-            inschrijvingLijst.innerHTML = '';
-            let alleInschrijvingen = [];
-            
-            inschrijvingen.forEach(inschrijving => {
-                inschrijving.toetsen.forEach(toets => {
-                    alleInschrijvingen.push({
-                        leerling: inschrijving.naam,
-                        klas: inschrijving.klas,
-                        toets: toets.titel,
-                        ingeschrevenDoor: toets.ingeschrevenDoor,
-                        status: toets.status,
-                        opmerkingen: toets.opmerkingen,
-                        leerlingEmail: inschrijving.email
-                    });
-                });
-            });
-            
-            if (alleInschrijvingen.length === 0) {
-                geenInschrijvingenText.classList.remove('hidden');
-            } else {
-                geenInschrijvingenText.classList.add('hidden');
-                alleInschrijvingen.forEach(item => {
-                    const row = document.createElement('tr');
-                    let statusClass = '';
-                    switch (item.status) {
-                        case 'pending':
-                            statusClass = 'status-pending';
-                            break;
-                        case 'approved':
-                            statusClass = 'status-approved';
-                            break;
-                        case 'rejected':
-                            statusClass = 'status-rejected';
-                            break;
-                    }
-                    
-                    row.className = "hover:bg-gray-100 transition-colors";
-                    row.innerHTML = `
-                        <td class="py-2 px-4 whitespace-nowrap">${item.leerling}</td>
-                        <td class="py-2 px-4 whitespace-nowrap">${item.klas}</td>
-                        <td class="py-2 px-4 whitespace-nowrap">${item.toets}</td>
-                        <td class="py-2 px-4 whitespace-nowrap">${item.ingeschrevenDoor}</td>
-                        <td class="py-2 px-4 whitespace-nowrap">
-                            <select onchange="updateInschrijvingStatus('${item.leerlingEmail}', '${item.toets}', this.value)" class="px-2 py-1 border rounded-md text-sm">
-                                <option value="pending" ${item.status === 'pending' ? 'selected' : ''}>In afwachting</option>
-                                <option value="approved" ${item.status === 'approved' ? 'selected' : ''}>Goedgekeurd</option>
-                                <option value="rejected" ${item.status === 'rejected' ? 'selected' : ''}>Afgewezen</option>
-                            </select>
-                        </td>
-                        <td class="py-2 px-4 whitespace-nowrap">
-                             <input type="text" onchange="updateInschrijvingOpmerking('${item.leerlingEmail}', '${item.toets}', this.value)" value="${item.opmerkingen?.coordinator || ''}" placeholder="Opmerking" class="w-full px-2 py-1 border rounded-md text-sm">
-                        </td>
-                        <td class="py-2 px-4 whitespace-nowrap">${item.opmerkingen?.leerling || 'Geen'}</td>
-                        <td class="py-2 px-4 whitespace-nowrap">
-                            <button onclick="verwijderInschrijving('${item.leerlingEmail}', '${item.toets}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijder</button>
-                        </td>
-                    `;
-                    inschrijvingLijst.appendChild(row);
-                });
-            }
-
-            toonStatistieken(alleInschrijvingen);
-        }
-
-        function updateInschrijvingStatus(leerlingEmail, toetsTitel, nieuweStatus) {
-            const inschrijvingen = getFromLocalStorage('inschrijvingen');
-            const leerlingInschrijving = inschrijvingen.find(i => i.email === leerlingEmail);
-            if (leerlingInschrijving) {
-                const toets = leerlingInschrijving.toetsen.find(t => t.titel === toetsTitel);
-                if (toets) {
-                    toets.status = nieuweStatus;
-                    saveToLocalStorage('inschrijvingen', inschrijvingen);
-                    toonInschrijvingen();
-                }
-            }
-        }
-        
-        function updateInschrijvingOpmerking(leerlingEmail, toetsTitel, nieuweOpmerking) {
-            const inschrijvingen = getFromLocalStorage('inschrijvingen');
-            const leerlingInschrijving = inschrijvingen.find(i => i.email === leerlingEmail);
-            if (leerlingInschrijving) {
-                const toets = leerlingInschrijving.toetsen.find(t => t.titel === toetsTitel);
-                if (toets) {
-                    toets.opmerkingen.coordinator = nieuweOpmerking;
-                    saveToLocalStorage('inschrijvingen', inschrijvingen);
-                    // Geen herlaad nodig, input veld behoudt de waarde
-                }
-            }
-        }
-        
-        function verwijderInschrijving(leerlingEmail, toetsTitel) {
-            if (confirm("Weet je zeker dat je deze inschrijving wilt verwijderen?")) {
-                let inschrijvingen = getFromLocalStorage('inschrijvingen');
-                let leerlingInschrijving = inschrijvingen.find(i => i.email === leerlingEmail);
-                if (leerlingInschrijving) {
-                    leerlingInschrijving.toetsen = leerlingInschrijving.toetsen.filter(t => t.titel !== toetsTitel);
-                    if (leerlingInschrijving.toetsen.length === 0) {
-                        inschrijvingen = inschrijvingen.filter(i => i.email !== leerlingEmail);
-                    }
-                    saveToLocalStorage('inschrijvingen', inschrijvingen);
-                    toonInschrijvingen();
-                }
-            }
-        }
-        
-        function resetInschrijvingen() {
-            if (confirm("Weet je zeker dat je ALLE inschrijvingen wilt verwijderen? Dit kan niet ongedaan worden gemaakt.")) {
-                localStorage.removeItem('inschrijvingen');
-                toonInschrijvingen();
-                alert("Alle inschrijvingen zijn verwijderd.");
-            }
-        }
-
-        function toonStatistieken(alleInschrijvingen) {
-            statistiekLijst.innerHTML = '';
-            const totaal = alleInschrijvingen.length;
-            const goedgekeurd = alleInschrijvingen.filter(i => i.status === 'approved').length;
-            const afgewezen = alleInschrijvingen.filter(i => i.status === 'rejected').length;
-            const inAfwachting = totaal - goedgekeurd - afgewezen;
-            
-            statistiekLijst.innerHTML = `
-                <li>Totaal aantal inschrijvingen: <strong>${totaal}</strong></li>
-                <li>Goedgekeurd: <strong>${goedgekeurd}</strong></li>
-                <li>In afwachting: <strong>${inAfwachting}</strong></li>
-                <li>Afgewezen: <strong>${afgewezen}</strong></li>
-            `;
-        }
-
-        // CSV exporteer logica
-        function exportCSV() {
-            const inschrijvingen = getFromLocalStorage('inschrijvingen');
-            let csvContent = "data:text/csv;charset=utf-8,";
-            
-            const headers = ["Leerling", "Klas", "Toets", "Ingeschreven door", "Status", "Opmerking Coördinator", "Opmerking Leerling"];
-            csvContent += headers.join(";") + "\n";
-            
-            inschrijvingen.forEach(inschrijving => {
-                inschrijving.toetsen.forEach(toets => {
-                    const row = [
-                        inschrijving.naam,
-                        inschrijving.klas,
-                        toets.titel,
-                        toets.ingeschrevenDoor,
-                        toets.status,
-                        toets.opmerkingen?.coordinator || '',
-                        toets.opmerkingen?.leerling || ''
-                    ];
-                    csvContent += row.map(e => `"${e}"`).join(";") + "\n";
-                });
-            });
-            
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "inschrijvingen.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // Sorteringstabel
-        function sorteerTabel(kolom) {
-            const tabel = document.getElementById('inschrijvingLijst');
-            const rijen = Array.from(tabel.rows);
-            const index = ['leerling', 'klas', 'toets', 'ingeschrevenDoor', 'status'].indexOf(kolom);
-
-            if (index === -1) return;
-
-            const richting = sorteerRichting[kolom] === 'asc' ? 'desc' : 'asc';
-            sorteerRichting = { [kolom]: richting };
-
-            const gesorteerdeRijen = rijen.sort((a, b) => {
-                const valA = a.cells[index].textContent.toLowerCase();
-                const valB = b.cells[index].textContent.toLowerCase();
-                if (valA < valB) return richting === 'asc' ? -1 : 1;
-                if (valA > valB) return richting === 'asc' ? 1 : -1;
-                return 0;
-            });
-
-            tabel.innerHTML = '';
-            gesorteerdeRijen.forEach(rij => tabel.appendChild(rij));
-        }
-
-        // Globale instellingen
-        function slaGlobaleInstellingenOp() {
-            saveToLocalStorage('globaleInschrijvingenGesloten', globalInschrijvingenCheckbox.checked);
-        }
-    </script>
+    </script>
 </body>
 </html>
