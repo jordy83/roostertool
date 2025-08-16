@@ -17,6 +17,8 @@ Dashboard:
 	Via dachboard kan coordinator wel gewoon lln inschrijven na deadline
 	Coordinator kan handmatig inschrijvingen sluiten.
 
+	Toetsen aanpassen via dashboard werkt nog niet helemaal. klas gaat fout
+
 
 Accounts: Koppelen met school?
 	Leerling accounts aanmaken
@@ -118,5 +120,6 @@ _Totaal: ± 7 weken (flexibel afhankelijk van teamgrootte)_
 
 
 	
+
 
 
