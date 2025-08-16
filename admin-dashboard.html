@@ -8,12 +8,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .input-group { margin-bottom: 1rem; }
-        .input-label { font-weight: 600; }
-        .input { width: 100%; padding: 0.5rem; border-radius: 0.5rem; border: 1px solid #d1d5db; }
+        .tab-link { cursor:pointer; }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
     </style>
     <script>
-        // Genereer een veilig wachtwoord
+        // Tabs
+        function showTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            document.querySelectorAll('.tab-link').forEach(e => e.classList.remove('border-blue-600'));
+            document.getElementById('tab-'+tab).classList.add('border-blue-600');
+        }
+
+        // Password generator
         function generatePassword(length = 10) {
             const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*?";
             let password = "";
@@ -23,67 +31,124 @@
             return password;
         }
 
-        // Account opslaan in localStorage
+        // Filter/search
+        function filterAccounts() {
+            const zoekterm = document.getElementById('zoekInput').value.toLowerCase();
+            const type = document.getElementById('filterType').value;
+            renderAccounts(zoekterm, type);
+        }
+
+        // Accounts CRUD
         function saveAccount(e) {
             e.preventDefault();
-            const naam = document.getElementById('naam').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const wachtwoord = document.getElementById('wachtwoord').value;
-            const functie = document.getElementById('functie').value;
-            const isCoordinator = document.getElementById('isCoordinator').checked;
-            const isAdmin = document.getElementById('isAdmin').checked;
-            const klas = document.getElementById('klas').value.trim();
+            const id = document.getElementById('accId').value || Date.now().toString();
+            const naam = document.getElementById('accNaam').value.trim();
+            const email = document.getElementById('accEmail').value.trim();
+            const wachtwoord = document.getElementById('accWachtwoord').value;
+            const type = document.getElementById('accType').value;
 
             if (!naam || !email || !wachtwoord) {
                 alert("Naam, e-mail en wachtwoord zijn verplicht!");
                 return;
             }
 
-            const account = {
-                naam,
-                email,
-                wachtwoord,
-                functie,
-                isCoordinator: functie === 'medewerker' ? isCoordinator : false,
-                isAdmin: functie === 'medewerker' ? isAdmin : false,
-                klas: functie === 'leerling' ? klas : ""
-            };
-
             let accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
-            accounts.push(account);
+            const idx = accounts.findIndex(a => a.id === id);
+
+            const account = {id, naam, email, wachtwoord, type};
+
+            if (idx > -1) {
+                accounts[idx] = account;
+            } else {
+                accounts.push(account);
+            }
             localStorage.setItem('accounts', JSON.stringify(accounts));
             renderAccounts();
             e.target.reset();
-            document.getElementById('wachtwoord').value = "";
+            document.getElementById('accId').value = "";
+            document.getElementById('accWachtwoord').value = "";
         }
 
-        // Wachtwoord genereren en invullen
+        function editAccount(id) {
+            const accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
+            const acc = accounts.find(a => a.id === id);
+            if (!acc) return;
+            document.getElementById('accId').value = acc.id;
+            document.getElementById('accNaam').value = acc.naam;
+            document.getElementById('accEmail').value = acc.email;
+            document.getElementById('accWachtwoord').value = acc.wachtwoord;
+            document.getElementById('accType').value = acc.type;
+            window.scrollTo({top:0, behavior:"smooth"});
+        }
+
+        function deleteAccount(id) {
+            if (!confirm("Weet je zeker dat je dit account wilt verwijderen?")) return;
+            let accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
+            accounts = accounts.filter(a => a.id !== id);
+            localStorage.setItem('accounts', JSON.stringify(accounts));
+            renderAccounts();
+        }
+
         function vulWachtwoord() {
-            document.getElementById('wachtwoord').value = generatePassword(12);
+            document.getElementById('accWachtwoord').value = generatePassword(12);
         }
 
-        // Accounts tonen
-        function renderAccounts() {
+        // Inline bewerking
+        function inlineEdit(id, veld, value) {
+            let accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
+            const idx = accounts.findIndex(a => a.id === id);
+            if (idx > -1) {
+                accounts[idx][veld] = value;
+                localStorage.setItem('accounts', JSON.stringify(accounts));
+                renderAccounts();
+            }
+        }
+
+        // Account overzicht met filter/search
+        function renderAccounts(zoekterm = "", typeFilter = "alle") {
             const list = document.getElementById('accountList');
             list.innerHTML = "";
-            const accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
+            let accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
+            if (zoekterm) {
+                accounts = accounts.filter(a =>
+                    a.naam.toLowerCase().includes(zoekterm) ||
+                    a.email.toLowerCase().includes(zoekterm)
+                );
+            }
+            if (typeFilter !== "alle") {
+                accounts = accounts.filter(a => a.type === typeFilter);
+            }
             if (accounts.length === 0) {
-                list.innerHTML = "<li class='text-gray-500'>Nog geen accounts aangemaakt.</li>";
+                list.innerHTML = "<li class='text-gray-500'>Geen accounts gevonden.</li>";
                 return;
             }
             accounts.forEach(acc => {
                 list.innerHTML += `
-                    <li class="p-4 mb-2 bg-white border rounded-lg shadow-sm">
-                        <strong>${acc.naam}</strong> (${acc.email})<br/>
-                        <span class="text-sm text-gray-700">Type: ${acc.functie}${acc.functie === "medewerker" ? 
-                            (acc.isCoordinator ? ", Coördinator" : "") + (acc.isAdmin ? ", Admin" : "") : ""}${acc.functie === "leerling" && acc.klas ? ", Klas: " + acc.klas : ""}</span>
+                    <li class="p-4 mb-2 bg-white border rounded-lg shadow-sm flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+                        <div class="flex-1">
+                            <strong>${acc.naam}</strong>
+                            <input type="text" value="${acc.naam}" onchange="inlineEdit('${acc.id}', 'naam', this.value)" class="border rounded px-2 ml-2 w-32" title="Pas naam aan"/>
+                            <br/>
+                            <span class="text-sm text-gray-700">Email: <input type="text" value="${acc.email}" onchange="inlineEdit('${acc.id}', 'email', this.value)" class="border rounded px-2 w-40" title="Pas email aan"/></span><br />
+                            <span class="text-sm text-gray-700">Wachtwoord: <input type="text" value="${acc.wachtwoord}" onchange="inlineEdit('${acc.id}', 'wachtwoord', this.value)" class="border rounded px-2 w-32" title="Pas wachtwoord aan"/></span><br />
+                            <span class="text-sm text-gray-700">Type: 
+                                <select onchange="inlineEdit('${acc.id}', 'type', this.value)" class="border rounded px-2">
+                                    <option value="medewerker" ${acc.type === "medewerker" ? "selected":""}>Medewerker</option>
+                                    <option value="leerling" ${acc.type === "leerling" ? "selected":""}>Leerling</option>
+                                </select>
+                            </span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="editAccount('${acc.id}')" class="text-blue-600 hover:underline">Bewerk</button>
+                            <button onclick="deleteAccount('${acc.id}')" class="text-red-600 hover:underline">Verwijder</button>
+                        </div>
                     </li>
                 `;
             });
         }
 
-        // Initialiseren
         window.onload = () => {
+            showTab('accounts');
             renderAccounts();
         };
     </script>
@@ -101,50 +166,51 @@
                 Uitloggen
             </a>
         </div>
+        <nav class="flex space-x-6 mt-2 px-6">
+            <a onclick="showTab('accounts')" id="tab-accounts" class="tab-link text-gray-600 hover:text-blue-600 font-medium transition-colors border-b-2 border-transparent pb-2">Accounts</a>
+        </nav>
     </header>
 
-    <main class="max-w-2xl mx-auto px-6 py-12 space-y-10">
-        <section class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-            <h2 class="text-xl font-bold text-gray-800 mb-6">Account aanmaken</h2>
+    <main class="max-w-2xl mx-auto px-6 py-12">
+        <!-- Accounts Tab -->
+        <section id="accounts" class="tab-content bg-white p-8 rounded-2xl shadow-lg border border-gray-200 active">
+            <h2 class="text-xl font-bold text-gray-800 mb-6">Accountbeheer</h2>
             <form id="accountForm" onsubmit="saveAccount(event)" class="space-y-4">
-                <div class="input-group">
-                    <label class="input-label">Naam</label>
-                    <input type="text" id="naam" class="input" required />
+                <input type="hidden" id="accId" />
+                <div>
+                    <label class="block font-medium mb-1">Naam</label>
+                    <input type="text" id="accNaam" class="w-full border-gray-300 rounded-md shadow-sm" required />
                 </div>
-                <div class="input-group">
-                    <label class="input-label">E-mail</label>
-                    <input type="email" id="email" class="input" required />
+                <div>
+                    <label class="block font-medium mb-1">E-mail</label>
+                    <input type="email" id="accEmail" class="w-full border-gray-300 rounded-md shadow-sm" required />
                 </div>
-                <div class="input-group">
-                    <label class="input-label">Wachtwoord</label>
+                <div>
+                    <label class="block font-medium mb-1">Wachtwoord</label>
                     <div class="flex gap-2">
-                        <input type="text" id="wachtwoord" class="input" required />
+                        <input type="text" id="accWachtwoord" class="w-full border-gray-300 rounded-md shadow-sm" required />
                         <button type="button" onclick="vulWachtwoord()" class="bg-blue-600 text-white px-3 rounded hover:bg-blue-700">Genereer</button>
                     </div>
                 </div>
-                <div class="input-group">
-                    <label class="input-label">Functie / Type</label>
-                    <select id="functie" class="input" onchange="document.getElementById('medewerkerOpties').style.display = this.value === 'medewerker' ? 'block' : 'none'; document.getElementById('leerlingOpties').style.display = this.value === 'leerling' ? 'block' : 'none';">
+                <div>
+                    <label class="block font-medium mb-1">Type</label>
+                    <select id="accType" class="w-full border-gray-300 rounded-md shadow-sm">
                         <option value="medewerker">Medewerker</option>
                         <option value="leerling">Leerling</option>
                     </select>
                 </div>
-                <div id="medewerkerOpties" style="display:block" class="input-group">
-                    <label><input type="checkbox" id="isCoordinator" /> Coördinator</label>
-                    <label class="ml-4"><input type="checkbox" id="isAdmin" /> Admin</label>
-                </div>
-                <div id="leerlingOpties" style="display:none" class="input-group">
-                    <label class="input-label">Klas</label>
-                    <input type="text" id="klas" class="input" placeholder="Bijv. 3A">
-                </div>
                 <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700 transition-colors">
-                    Account opslaan
+                    Opslaan
                 </button>
             </form>
-        </section>
-
-        <section class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-            <h2 class="text-xl font-bold text-gray-800 mb-6">Gemaakte accounts</h2>
+            <div class="flex gap-4 mt-8 mb-2">
+                <input type="text" id="zoekInput" placeholder="Zoek op naam of e-mail..." class="border rounded px-2 w-1/2" oninput="filterAccounts()"/>
+                <select id="filterType" class="border rounded px-2" onchange="filterAccounts()" style="min-width:120px;">
+                    <option value="alle">Alle types</option>
+                    <option value="medewerker">Medewerker</option>
+                    <option value="leerling">Leerling</option>
+                </select>
+            </div>
             <ul id="accountList" class="space-y-2"></ul>
         </section>
     </main>
