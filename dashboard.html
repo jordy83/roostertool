@@ -4,6 +4,10 @@
     </head>
 <body class="bg-gray-50 text-gray-800 antialiased">
 
+    <div class="flex justify-end mt-4">
+        <button onclick="slaInschrijvingenOp()" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors">Opslaan</button>
+    </div>
+
     <script>
         // Bestaande DOM elementen
         const accountLijst = document.getElementById('accountLijst');
@@ -343,30 +347,19 @@
 
         function toonInschrijvingen() {
             const inschrijvingen = getFromLocalStorage('inschrijvingen');
-            const toetsTeller = {};
             const losseInschrijvingen = [];
 
             inschrijvingen.forEach(leerlingInschrijving => {
                 leerlingInschrijving.toetsen.forEach(toetsObject => {
-                    const toetsTitel = toetsObject.titel;
-                    const ingeschrevenDoor = toetsObject.ingeschrevenDoor || 'Leerling';
-                    const opmerkingCoordinator = toetsObject.opmerkingen?.coordinator || '';
-                    const opmerkingLeerling = toetsObject.opmerkingen?.leerling || '';
-                    const status = toetsObject.status || 'pending';
-                    
                     losseInschrijvingen.push({
                         leerling: leerlingInschrijving.naam,
                         klas: leerlingInschrijving.klas,
-                        toets: toetsTitel,
-                        ingeschrevenDoor: ingeschrevenDoor,
-                        opmerkingCoordinator: opmerkingCoordinator,
-                        opmerkingLeerling: opmerkingLeerling,
-                        status: status
+                        toets: toetsObject.titel,
+                        ingeschrevenDoor: toetsObject.ingeschrevenDoor || 'Leerling',
+                        opmerkingCoordinator: toetsObject.opmerkingen?.coordinator || '',
+                        opmerkingLeerling: toetsObject.opmerkingen?.leerling || '',
+                        bevroren: toetsObject.bevroren || false,
                     });
-                    
-                    if (status === 'approved') {
-                        toetsTeller[toetsTitel] = (toetsTeller[toetsTitel] || 0) + 1;
-                    }
                 });
             });
 
@@ -387,31 +380,6 @@
             } else {
                 geenInschrijvingenText.classList.add('hidden');
                 gesorteerdeLijst.forEach((inschrijving) => {
-                    let statusBadgeClass = '';
-                    let statusText = '';
-                    let actiesHtml = '';
-                    switch (inschrijving.status) {
-                        case 'approved':
-                            statusBadgeClass = 'status-approved';
-                            statusText = 'Goedgekeurd';
-                            actiesHtml = `<button onclick="verwijderInschrijving('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijder</button>`;
-                            break;
-                        case 'rejected':
-                            statusBadgeClass = 'status-rejected';
-                            statusText = 'Afgewezen';
-                            actiesHtml = `<button onclick="verwijderInschrijving('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijder</button>`;
-                            break;
-                        case 'pending':
-                        default:
-                            statusBadgeClass = 'status-pending';
-                            statusText = 'In afwachting';
-                            actiesHtml = `
-                                <button onclick="keurInschrijvingGoed('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-green-500 text-white px-3 py-1 text-sm rounded-md hover:bg-green-600 transition-colors">Goedkeuren</button>
-                                <button onclick="wijsInschrijvingAf('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Afwijzen</button>
-                            `;
-                            break;
-                    }
-
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-gray-50";
                     tr.innerHTML = `
@@ -419,7 +387,9 @@
                         <td class="py-3 px-4">${inschrijving.klas}</td>
                         <td class="py-3 px-4">${inschrijving.toets}</td>
                         <td class="py-3 px-4">${inschrijving.ingeschrevenDoor}</td>
-                        <td class="py-3 px-4"><span class="status-badge ${statusBadgeClass}">${statusText}</span></td>
+                        <td class="py-3 px-4">
+                            <input type="checkbox" onchange="markeerAlsGewijzigd()" data-leerling="${inschrijving.leerling}" data-toets="${inschrijving.toets}" ${inschrijving.bevroren ? 'checked' : ''} class="bevries-checkbox h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        </td>
                         <td class="py-3 px-4 whitespace-pre-wrap">
                             <div class="flex items-center space-x-2">
                                 <span>${inschrijving.opmerkingCoordinator}</span>
@@ -427,20 +397,19 @@
                             </div>
                         </td>
                         <td class="py-3 px-4 whitespace-pre-wrap">${inschrijving.opmerkingLeerling}</td>
-                        <td class="py-3 px-4">${actiesHtml}</td>
+                        <td class="py-3 px-4">
+                            <button onclick="verwijderInschrijving('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijder</button>
+                        </td>
                     `;
                     inschrijvingLijst.appendChild(tr);
                 });
             }
-
-            // Statistieken bijwerken
-            statistiekLijst.innerHTML = '';
-            const sortedToetsen = Object.entries(toetsTeller).sort(([, countA], [, countB]) => countB - countA);
-            sortedToetsen.forEach(([toets, count]) => {
-                const li = document.createElement('li');
-                li.textContent = `${toets}: ${count} goedgekeurde inschrijvingen`;
-                statistiekLijst.appendChild(li);
-            });
+        }
+        
+        // Functie om wijzigingen te markeren voor opslag
+        let wijzigingenInWachtrij = false;
+        function markeerAlsGewijzigd() {
+            wijzigingenInWachtrij = true;
         }
 
         // Functie voor het sorteren van de tabel
@@ -491,11 +460,11 @@
             leerlingInschrijving.toetsen.push({
                 titel: toetsTitel,
                 ingeschrevenDoor: 'Coördinator',
-                status: 'approved',
                 opmerkingen: {
                     coordinator: opmerkingCoordinator,
                     leerling: ''
-                }
+                },
+                bevroren: true // Handmatige inschrijvingen zijn standaard bevroren
             });
 
             saveToLocalStorage('inschrijvingen', inschrijvingen);
@@ -506,32 +475,29 @@
             setTimeout(() => inschrijvingFeedback.classList.add('hidden'), 3000);
         }
 
-        // Functie om inschrijving goed te keuren
-        function keurInschrijvingGoed(leerlingNaam, toetsTitel) {
+        // Functie om de "bevries"-status te verwerken en op te slaan
+        function slaInschrijvingenOp() {
+            const checkboxes = document.querySelectorAll('.bevries-checkbox');
             let inschrijvingen = getFromLocalStorage('inschrijvingen');
-            const inschrijving = inschrijvingen.find(i => i.naam === leerlingNaam);
-            if (inschrijving) {
-                const toets = inschrijving.toetsen.find(t => t.titel === toetsTitel);
-                if (toets) {
-                    toets.status = 'approved';
-                    saveToLocalStorage('inschrijvingen', inschrijvingen);
-                    toonInschrijvingen();
-                }
-            }
-        }
 
-        // Functie om inschrijving af te wijzen
-        function wijsInschrijvingAf(leerlingNaam, toetsTitel) {
-            let inschrijvingen = getFromLocalStorage('inschrijvingen');
-            const inschrijving = inschrijvingen.find(i => i.naam === leerlingNaam);
-            if (inschrijving) {
-                const toets = inschrijving.toetsen.find(t => t.titel === toetsTitel);
-                if (toets) {
-                    toets.status = 'rejected';
-                    saveToLocalStorage('inschrijvingen', inschrijvingen);
-                    toonInschrijvingen();
+            checkboxes.forEach(checkbox => {
+                const leerlingNaam = checkbox.dataset.leerling;
+                const toetsTitel = checkbox.dataset.toets;
+                const isBevroren = checkbox.checked;
+                
+                const inschrijving = inschrijvingen.find(i => i.naam === leerlingNaam);
+                if (inschrijving) {
+                    const toets = inschrijving.toetsen.find(t => t.titel === toetsTitel);
+                    if (toets) {
+                        toets.bevroren = isBevroren;
+                    }
                 }
-            }
+            });
+
+            saveToLocalStorage('inschrijvingen', inschrijvingen);
+            alert("Wijzigingen succesvol opgeslagen.");
+            toonInschrijvingen();
+            wijzigingenInWachtrij = false;
         }
 
         // Functie om inschrijving te verwijderen
@@ -600,7 +566,7 @@
         // Functie om CSV te exporteren
         function exportCSV() {
             const inschrijvingen = getFromLocalStorage('inschrijvingen');
-            const headers = ["Leerling", "Klas", "Toets", "Ingeschreven door", "Status", "Opmerking Coördinator", "Opmerking Leerling"];
+            const headers = ["Leerling", "Klas", "Toets", "Ingeschreven door", "Bevroren", "Opmerking Coördinator", "Opmerking Leerling"];
             
             let csvContent = headers.join(";") + "\n";
             
@@ -611,7 +577,7 @@
                         `"${leerlingInschrijving.klas}"`,
                         `"${toetsObject.titel}"`,
                         `"${toetsObject.ingeschrevenDoor || 'Leerling'}"`,
-                        `"${toetsObject.status || 'pending'}"`,
+                        `"${toetsObject.bevroren ? 'Ja' : 'Nee'}"`,
                         `"${(toetsObject.opmerkingen?.coordinator || '').replace(/"/g, '""')}"`,
                         `"${(toetsObject.opmerkingen?.leerling || '').replace(/"/g, '""')}"`
                     ];
