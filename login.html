@@ -1,79 +1,54 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Leerling Login</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inloggen voor Toetsen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans">
-
-   <header class="bg-white shadow-md relative z-20">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <a href="index.html" class="text-2xl font-bold text-blue-600">RoosterTool</a>
-            </div>
-            <div class="flex items-center gap-4">
-                
-             <a href="contact.html" class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-700 transition-colors duration-200 ease-in-out">
-                    Contact
-                </a>
-            </div>
-        </div>
-    </header>
-
-  <section class="min-h-screen flex items-center justify-center">
-    <div class="max-w-md w-full bg-white p-8 rounded shadow">
-      <h1 class="text-2xl font-bold text-center text-blue-600 mb-6">RoosterTool Login</h1>
-
-      <form id="loginForm">
-        <div class="mb-4">
-          <label for="loginNaam" class="block text-sm font-medium mb-1">Naam leerling</label>
-          <input type="text" id="loginNaam" name="loginNaam"
-                 class="w-full border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-
-        <div class="mb-6">
-          <label for="loginWachtwoord" class="block text-sm font-medium mb-1">Wachtwoord</label>
-          <input type="password" id="loginWachtwoord" name="loginWachtwoord"
-                 class="w-full border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-
-        <button type="submit"
-                class="w-full bg-blue-600 text-white py-3 rounded-lg text-lg hover:bg-blue-700">
-          Inloggen
-        </button>
-      </form>
-
-      <div id="loginFeedback" class="mt-4 text-center text-red-600 font-semibold hidden">
-        ❌ Naam of wachtwoord klopt niet.
-      </div>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm text-center">
+        <h1 class="text-3xl font-bold text-blue-600 mb-6">Inloggen</h1>
+        <form id="loginForm" class="space-y-4">
+            <input type="text" id="username" placeholder="Naam" required
+                   class="w-full border border-gray-300 px-4 py-2 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+            <input type="password" id="password" placeholder="Wachtwoord" required
+                   class="w-full border border-gray-300 px-4 py-2 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+            <button type="submit"
+                    class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors">
+                Inloggen
+            </button>
+        </form>
+        <p id="loginMessage" class="mt-4 text-red-500 font-medium hidden">
+            Ongeldige gebruikersnaam of wachtwoord.
+        </p>
     </div>
-  </section>
 
-  <script>
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      e.preventDefault();
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const accountKey = 'account_' + username;
+            const loginMessage = document.getElementById('loginMessage');
 
-      const naam = document.getElementById('loginNaam').value.trim();
-      const wachtwoord = document.getElementById('loginWachtwoord').value;
-
-      const account = JSON.parse(localStorage.getItem('account_' + naam) || '{}');
-
-      if (account.naam === naam && account.wachtwoord === wachtwoord) {
-        localStorage.setItem('actieveLeerling', JSON.stringify(account));
-        window.location.href = 'inschrijven.html';
-      } else {
-        document.getElementById('loginFeedback').classList.remove('hidden');
-      }
-    });
-  </script>
-
+            if (localStorage.getItem(accountKey)) {
+                const account = JSON.parse(localStorage.getItem(accountKey));
+                if (account.wachtwoord === password) {
+                    localStorage.setItem('actieveLeerling', username);
+                    window.location.href = 'inschrijven.html';
+                } else {
+                    loginMessage.classList.remove('hidden');
+                }
+            } else {
+                loginMessage.classList.remove('hidden');
+            }
+        });
+    </script>
 </body>
 </html>
-
-
-
