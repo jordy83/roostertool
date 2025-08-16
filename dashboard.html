@@ -44,11 +44,13 @@
                     <h3 class="text-xl font-bold mb-4 text-gray-800">Voeg leerlingaccount toe</h3>
                     <form id="accountForm" class="space-y-4">
                         <input type="text" id="nieuweNaam" placeholder="Naam"
-                               class="w-full border border-gray-300 px-4 py-2 rounded-lg" />
+                               class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
                         <input type="text" id="nieuweKlas" placeholder="Klas"
-                               class="w-full border border-gray-300 px-4 py-2 rounded-lg" />
+                               class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
+                        <input type="email" id="nieuwEmail" placeholder="E-mailadres"
+                               class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
                         <input type="password" id="nieuwWachtwoord" placeholder="Wachtwoord"
-                               class="w-full border border-gray-300 px-4 py-2 rounded-lg" />
+                               class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
                         <button type="submit"
                                 class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
                             Account toevoegen
@@ -76,6 +78,16 @@
                      Verwijder alle leerlingaccounts
                  </button>
             </div>
+            <div class="mt-4 pt-4 border-t border-gray-200 text-center">
+                <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4">
+                    <button onclick="stuurWachtwoorden('geselecteerd')" class="bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                        Verstuur wachtwoorden naar geselecteerden
+                    </button>
+                    <button onclick="stuurWachtwoorden('alle')" class="bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                        Verstuur wachtwoorden naar iedereen
+                    </button>
+                </div>
+            </div>
         </section>
 
         <section id="toetsen" class="tab-content bg-white p-8 rounded-2xl shadow-lg border border-gray-200 hidden">
@@ -84,11 +96,11 @@
                 <div>
                     <h3 class="text-xl font-bold mb-4 text-gray-800">Handmatig Toevoegen</h3>
                     <form id="toetsForm" class="space-y-4">
-                        <input type="text" id="toetsVak" placeholder="Vak (bijv. Wiskunde)" class="w-full border border-gray-300 px-4 py-2 rounded-lg" />
-                        <input type="text" id="toetsNr" placeholder="Toetsnummer (bijv. 2.1)" class="w-full border border-gray-300 px-4 py-2 rounded-lg" />
-                        <input type="text" id="toetsSoort" placeholder="Soort (bijv. Repetitie)" class="w-full border border-gray-300 px-4 py-2 rounded-lg" />
-                        <input type="text" id="toetsDuur" placeholder="Duur (bijv. 45 minuten)" class="w-full border border-gray-300 px-4 py-2 rounded-lg" />
-                        <input type="text" id="toetsKlas" placeholder="Klas (bijv. VWO 4)" class="w-full border border-gray-300 px-4 py-2 rounded-lg" />
+                        <input type="text" id="toetsVak" placeholder="Vak (bijv. Wiskunde)" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
+                        <input type="text" id="toetsNr" placeholder="Toetsnummer (bijv. 2.1)" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
+                        <input type="text" id="toetsSoort" placeholder="Soort (bijv. Repetitie)" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
+                        <input type="text" id="toetsDuur" placeholder="Duur (bijv. 45 minuten)" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
+                        <input type="text" id="toetsKlas" placeholder="Klas (bijv. VWO 4)" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
                         <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
                             Toets Toevoegen
                         </button>
@@ -156,8 +168,9 @@
             <h3 class="text-lg font-bold mb-4">Account bewerken</h3>
             <form id="editAccountForm" class="space-y-4">
                 <input type="hidden" id="editNaamOrigineel">
-                <input type="text" id="editNaam" placeholder="Naam" class="w-full border border-gray-300 px-4 py-2 rounded-lg" />
-                <input type="text" id="editKlas" placeholder="Klas" class="w-full border border-gray-300 px-4 py-2 rounded-lg" />
+                <input type="text" id="editNaam" placeholder="Naam" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
+                <input type="text" id="editKlas" placeholder="Klas" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
+                <input type="email" id="editEmail" placeholder="E-mailadres" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
                 <input type="password" id="editWachtwoord" placeholder="Wachtwoord (optioneel)" class="w-full border border-gray-300 px-4 py-2 rounded-lg" />
                 <div class="flex justify-end space-x-4 mt-4">
                     <button type="button" onclick="document.getElementById('accountModal').classList.add('hidden')" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400">Annuleren</button>
@@ -172,11 +185,11 @@
             <h3 class="text-lg font-bold mb-4">Toets bewerken</h3>
             <form id="editToetsForm" class="space-y-4">
                 <input type="hidden" id="editToetsId">
-                <input type="text" id="editVak" placeholder="Vak" class="w-full border border-gray-300 px-4 py-2 rounded-lg" />
-                <input type="text" id="editToetsnr" placeholder="Toetsnummer" class="w-full border border-gray-300 px-4 py-2 rounded-lg" />
-                <input type="text" id="editSoort" placeholder="Soort" class="w-full border border-gray-300 px-4 py-2 rounded-lg" />
-                <input type="text" id="editDuur" placeholder="Duur" class="w-full border border-gray-300 px-4 py-2 rounded-lg" />
-                <input type="text" id="editKlas" placeholder="Klas" class="w-full border border-gray-300 px-4 py-2 rounded-lg" />
+                <input type="text" id="editVak" placeholder="Vak" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
+                <input type="text" id="editToetsnr" placeholder="Toetsnummer" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
+                <input type="text" id="editSoort" placeholder="Soort" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
+                <input type="text" id="editDuur" placeholder="Duur" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
+                <input type="text" id="editKlas" placeholder="Klas" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
                 <div class="flex justify-end space-x-4 mt-4">
                     <button type="button" onclick="document.getElementById('toetsModal').classList.add('hidden')" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400">Annuleren</button>
                     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Opslaan</button>
@@ -213,309 +226,3 @@
         document.addEventListener('DOMContentLoaded', () => {
             showTab('accounts');
         });
-
-        // Functie om accounts te tonen
-        function toonAccounts(filter = '') {
-            accountLijst.innerHTML = '';
-            Object.keys(localStorage).forEach(key => {
-                if (key.startsWith('account_')) {
-                    const account = JSON.parse(localStorage.getItem(key));
-                    if (account.naam.toLowerCase().includes(filter.toLowerCase())) {
-                        const li = document.createElement('li');
-                        li.className = "flex justify-between items-center mb-2";
-                        li.innerHTML = `
-                            <span><strong>${account.naam}</strong> uit klas <em>${account.klas}</em></span>
-                            <div class="space-x-2 flex">
-                                <button onclick="bewerkAccount('${account.naam}')" class="bg-yellow-500 text-white px-3 py-1 text-sm rounded-md hover:bg-yellow-600 transition-colors">Bewerken</button>
-                                <button onclick="verwijderAccount('${account.naam}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijderen</button>
-                            </div>
-                        `;
-                        accountLijst.appendChild(li);
-                    }
-                }
-            });
-        }
-        zoekInput.addEventListener('input', () => toonAccounts(zoekInput.value));
-        toonAccounts();
-
-        // Functie om aangemaakte toetsen te tonen
-        function toonToetsen() {
-            const toetsen = JSON.parse(localStorage.getItem('toetsen') || '[]');
-            aangemaakteToetsenLijst.innerHTML = '';
-            if (toetsen.length === 0) {
-                aangemaakteToetsenLijst.innerHTML = '<li>Nog geen toetsen aangemaakt.</li>';
-            } else {
-                toetsen.forEach((toets, index) => {
-                    const li = document.createElement('li');
-                    li.className = "flex justify-between items-center mb-2";
-                    li.innerHTML = `
-                        <span><strong>${toets.vak} (${toets.toetsnr})</strong> - ${toets.klas} (${toets.soort}, ${toets.duur})</span>
-                        <div class="space-x-2 flex">
-                            <button onclick="bewerkToets(${index})" class="bg-yellow-500 text-white px-3 py-1 text-sm rounded-md hover:bg-yellow-600 transition-colors">Bewerken</button>
-                            <button onclick="verwijderToets(${index})" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijderen</button>
-                        </div>
-                    `;
-                    aangemaakteToetsenLijst.appendChild(li);
-                });
-            }
-        }
-        toonToetsen();
-
-        // Inschrijvingen en statistieken tonen
-        function toonInschrijvingen() {
-            const inschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
-            const toetsTeller = {};
-
-            inschrijvingLijst.innerHTML = '';
-            if (inschrijvingen.length === 0) {
-                inschrijvingLijst.innerHTML = '<li>Nog geen inschrijvingen.</li>';
-            } else {
-                inschrijvingen.forEach((inschrijving, index) => {
-                    const li = document.createElement('li');
-                    li.className = "flex justify-between items-center mb-2";
-                    li.innerHTML = `
-                        <span><strong>${inschrijving.naam}</strong> (${inschrijving.klas}) heeft ingeschreven voor: <em>${inschrijving.toetsen.join(', ')}</em></span>
-                        <div class="space-x-2 flex">
-                            <button onclick="verwijderInschrijving(${index})" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijderen</button>
-                        </div>
-                    `;
-                    inschrijvingLijst.appendChild(li);
-                    inschrijving.toetsen.forEach(toets => {
-                        toetsTeller[toets] = (toetsTeller[toets] || 0) + 1;
-                    });
-                });
-            }
-
-            statistiekLijst.innerHTML = '';
-            Object.entries(toetsTeller).forEach(([toets, aantal]) => {
-                const li = document.createElement('li');
-                li.textContent = `${toets}: ${aantal} inschrijving(en)`;
-                statistiekLijst.appendChild(li);
-            });
-        }
-        toonInschrijvingen();
-
-        // Account toevoegen
-        document.getElementById('accountForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const naam = document.getElementById('nieuweNaam').value.trim();
-            const klas = document.getElementById('nieuweKlas').value.trim();
-            const wachtwoord = document.getElementById('nieuwWachtwoord').value;
-            if (!naam || !klas || !wachtwoord) return alert("⚠️ Vul alle velden in.");
-            localStorage.setItem('account_' + naam, JSON.stringify({ naam, klas, wachtwoord }));
-            document.getElementById('toevoegFeedback').classList.remove('hidden');
-            setTimeout(() => { 
-                document.getElementById('toevoegFeedback').classList.add('hidden');
-                toonAccounts();
-            }, 1500);
-            this.reset();
-        });
-        
-        // Handmatig Toets toevoegen
-        document.getElementById('toetsForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const vak = document.getElementById('toetsVak').value.trim();
-            const toetsnr = document.getElementById('toetsNr').value.trim();
-            const soort = document.getElementById('toetsSoort').value.trim();
-            const duur = document.getElementById('toetsDuur').value.trim();
-            const klas = document.getElementById('toetsKlas').value.trim();
-            if (!vak || !toetsnr || !soort || !duur || !klas) {
-                return alert("⚠️ Vul alle velden voor de toets in.");
-            }
-            const bestaandeToetsen = JSON.parse(localStorage.getItem('toetsen') || '[]');
-            const nieuweToets = { vak, toetsnr, soort, duur, klas };
-            bestaandeToetsen.push(nieuweToets);
-            localStorage.setItem('toetsen', JSON.stringify(bestaandeToetsen));
-            document.getElementById('toetsFeedback').classList.remove('hidden');
-            setTimeout(() => { 
-                document.getElementById('toetsFeedback').classList.add('hidden');
-                toonToetsen();
-            }, 1500);
-            this.reset();
-        });
-
-        // === CSV IMPORTEER FUNCTIONALITEIT ===
-        document.getElementById('importeerBtn').addEventListener('click', function() {
-            const fileInput = document.getElementById('csvFileInput');
-            if (fileInput.files.length === 0) {
-                alert('⚠️ Selecteer eerst een CSV-bestand om te importeren.');
-                return;
-            }
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const csvData = event.target.result;
-                const regels = csvData.split('\n').filter(regel => regel.trim() !== '');
-                if (regels.length <= 1) {
-                    alert('⚠️ CSV-bestand is leeg of bevat alleen een kopjesrij.');
-                    return;
-                }
-                const headers = regels[0].trim().split(',');
-                const verwachteHeaders = ['vak', 'toetsnr', 'soort', 'duur', 'klas'];
-                const heeftAlleHeaders = verwachteHeaders.every((h, i) => headers[i] && headers[i].trim() === h);
-                if (!heeftAlleHeaders) {
-                    alert('⚠️ CSV-kopjes zijn onjuist. Vereist: vak,toetsnr,soort,duur,klas');
-                    return;
-                }
-                const nieuweToetsen = [];
-                for (let i = 1; i < regels.length; i++) {
-                    const data = regels[i].trim().split(',');
-                    if (data.length === headers.length) {
-                        const toets = {
-                            vak: data[0].trim(),
-                            toetsnr: data[1].trim(),
-                            soort: data[2].trim(),
-                            duur: data[3].trim(),
-                            klas: data[4].trim()
-                        };
-                        nieuweToetsen.push(toets);
-                    }
-                }
-                const bestaandeToetsen = JSON.parse(localStorage.getItem('toetsen') || '[]');
-                const gecombineerdeToetsen = bestaandeToetsen.concat(nieuweToetsen);
-                localStorage.setItem('toetsen', JSON.stringify(gecombineerdeToetsen));
-                document.getElementById('importFeedback').classList.remove('hidden');
-                setTimeout(() => { 
-                    document.getElementById('importFeedback').classList.add('hidden');
-                    toonToetsen();
-                }, 1500);
-            };
-            reader.onerror = function() {
-                alert('⚠️ Er is een fout opgetreden bij het lezen van het bestand.');
-            };
-            reader.readAsText(file);
-        });
-
-        // CSV export
-        function exportCSV() {
-            let csv = "Naam,Klas,Toetsen\n";
-            const inschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
-            inschrijvingen.forEach(i => {
-                csv += `"${i.naam}","${i.klas}","${i.toetsen.join('; ')}"\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'inschrijvingen.csv';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // --- Individueel bewerken en verwijderen ---
-        
-        // Accounts
-        function bewerkAccount(naam) {
-            const account = JSON.parse(localStorage.getItem('account_' + naam));
-            document.getElementById('editNaamOrigineel').value = naam;
-            document.getElementById('editNaam').value = account.naam;
-            document.getElementById('editKlas').value = account.klas;
-            document.getElementById('editWachtwoord').value = ''; // Wachtwoord niet pre-fillen
-            document.getElementById('accountModal').classList.remove('hidden');
-        }
-
-        document.getElementById('editAccountForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const naamOrigineel = document.getElementById('editNaamOrigineel').value;
-            const nieuweNaam = document.getElementById('editNaam').value.trim();
-            const nieuweKlas = document.getElementById('editKlas').value.trim();
-            const nieuwWachtwoord = document.getElementById('editWachtwoord').value;
-
-            if (naamOrigineel !== nieuweNaam) {
-                 localStorage.removeItem('account_' + naamOrigineel);
-            }
-
-            const accountData = {
-                naam: nieuweNaam,
-                klas: nieuweKlas,
-                wachtwoord: nieuwWachtwoord ? nieuwWachtwoord : (JSON.parse(localStorage.getItem('account_' + naamOrigineel))?.wachtwoord || '')
-            };
-            localStorage.setItem('account_' + nieuweNaam, JSON.stringify(accountData));
-
-            document.getElementById('accountModal').classList.add('hidden');
-            toonAccounts();
-        });
-
-        function verwijderAccount(naam) {
-            if (confirm(`Weet je zeker dat je account van ${naam} wilt verwijderen?`)) {
-                localStorage.removeItem('account_' + naam);
-                toonAccounts();
-            }
-        }
-
-        // Toetsen
-        function bewerkToets(index) {
-            const toetsen = JSON.parse(localStorage.getItem('toetsen') || '[]');
-            const toets = toetsen[index];
-            document.getElementById('editToetsId').value = index;
-            document.getElementById('editVak').value = toets.vak;
-            document.getElementById('editToetsnr').value = toets.toetsnr;
-            document.getElementById('editSoort').value = toets.soort;
-            document.getElementById('editDuur').value = toets.duur;
-            document.getElementById('editKlas').value = toets.klas;
-            document.getElementById('toetsModal').classList.remove('hidden');
-        }
-        
-        document.getElementById('editToetsForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const index = document.getElementById('editToetsId').value;
-            const toetsen = JSON.parse(localStorage.getItem('toetsen') || '[]');
-            
-            toetsen[index].vak = document.getElementById('editVak').value.trim();
-            toetsen[index].toetsnr = document.getElementById('editToetsnr').value.trim();
-            toetsen[index].soort = document.getElementById('editSoort').value.trim();
-            toetsen[index].duur = document.getElementById('editDuur').value.trim();
-            toetsen[index].klas = document.getElementById('editKlas').value.trim();
-            
-            localStorage.setItem('toetsen', JSON.stringify(toetsen));
-            document.getElementById('toetsModal').classList.add('hidden');
-            toonToetsen();
-        });
-
-        function verwijderToets(index) {
-            if (confirm("Weet je zeker dat je deze toets wilt verwijderen?")) {
-                const toetsen = JSON.parse(localStorage.getItem('toetsen') || '[]');
-                toetsen.splice(index, 1);
-                localStorage.setItem('toetsen', JSON.stringify(toetsen));
-                toonToetsen();
-            }
-        }
-
-        // Inschrijvingen
-        function verwijderInschrijving(index) {
-             if (confirm("Weet je zeker dat je deze inschrijving wilt verwijderen?")) {
-                const inschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
-                inschrijvingen.splice(index, 1);
-                localStorage.setItem('inschrijvingen', JSON.stringify(inschrijvingen));
-                toonInschrijvingen();
-            }
-        }
-
-        // --- Resetfuncties ---
-        function resetAccounts() {
-            if (!confirm("Weet u zeker dat u alle accounts wilt verwijderen? Dit kan niet ongedaan worden gemaakt.")) return;
-            Object.keys(localStorage).forEach(key => {
-                if (key.startsWith('account_') || key === 'actieveLeerling') {
-                    localStorage.removeItem(key);
-                }
-            });
-            alert('✅ Accounts zijn succesvol verwijderd.');
-            toonAccounts();
-        }
-
-        function resetInschrijvingen() {
-            if (!confirm("Weet u zeker dat u alle inschrijvingen wilt verwijderen? Dit kan niet ongedaan worden gemaakt.")) return;
-            localStorage.removeItem('inschrijvingen');
-            alert('✅ Inschrijvingen zijn succesvol verwijderd.');
-            toonInschrijvingen();
-        }
-
-        function resetToetsen() {
-            if (!confirm("Weet u zeker dat u alle toetsen wilt verwijderen? Dit kan niet ongedaan worden gemaakt.")) return;
-            localStorage.removeItem('toetsen');
-            alert('✅ Toetsen zijn succesvol verwijderd.');
-            toonToetsen();
-        }
-    </script>
-</body>
-</html>
