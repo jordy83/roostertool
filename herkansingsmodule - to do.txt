@@ -4,6 +4,7 @@ Dashboard:
 	Soort, duur, vak, pta onderdeel
 		Toetsen aanmaken handmatig	
 		Toetsen aanmaken csv
+Headre onderaan pagina verwijderen. onnodig
 
 	Export toetslijst pdf per toets
 		Aantal leerlingen
@@ -17,6 +18,9 @@ Dashboard:
 	Export  toetsoverzicht pdf (totaal)
 
 	Toetsen aanpassen via dashboard werkt nog niet helemaal. klas gaat fout
+
+Leerling moet kunnen zien dat een coordinator een toets heeft verwijderd. kan nieuwe toets inschrijven
+Verwijderde toets moet ook zichtbaar blijven in daschboard en ongedaan kunnen worden gemaakt
 
 
 Accounts: Koppelen met school?
@@ -114,6 +118,7 @@ _Totaal: ± 7 weken (flexibel afhankelijk van teamgrootte)_
 
 
 	
+
 
 
 
