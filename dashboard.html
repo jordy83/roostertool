@@ -170,6 +170,8 @@
                                     <th class="py-3 px-4 sortable-header" onclick="sorteerTabel('klas')">Klas</th>
                                     <th class="py-3 px-4 sortable-header" onclick="sorteerTabel('toets')">Toets</th>
                                     <th class="py-3 px-4 sortable-header" onclick="sorteerTabel('ingeschrevenDoor')">Ingeschreven door</th>
+                                    <th class="py-3 px-4">Opmerking Coördinator</th>
+                                    <th class="py-3 px-4">Opmerking Leerling</th>
                                     <th class="py-3 px-4">Acties</th>
                                 </tr>
                             </thead>
@@ -186,16 +188,20 @@
                     <h3 class="text-xl font-bold mb-4 text-gray-800">Statistieken</h3>
                     <ul id="statistiekLijst" class="list-disc pl-5 text-gray-700 space-y-2"></ul>
                     <h3 class="text-xl font-bold mt-8 mb-4 text-gray-800">Handmatig inschrijven</h3>
-                    <div class="flex items-end space-x-2">
-                         <div class="flex-grow">
+                    <div class="flex flex-col space-y-4">
+                         <div>
                              <label for="leerlingSelect" class="block text-sm font-medium mb-1">Selecteer leerling</label>
                              <select id="leerlingSelect" class="w-full border border-gray-300 px-4 py-2 rounded-lg"></select>
                          </div>
-                         <div class="flex-grow">
+                         <div>
                              <label for="toetsSelect" class="block text-sm font-medium mb-1">Selecteer toets</label>
                              <select id="toetsSelect" class="w-full border border-gray-300 px-4 py-2 rounded-lg"></select>
                          </div>
-                         <button onclick="schrijfLeerlingIn()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                         <div>
+                            <label for="inschrijvingOpmerkingCoordinator" class="block text-sm font-medium mb-1">Opmerking Coördinator</label>
+                            <textarea id="inschrijvingOpmerkingCoordinator" rows="2" class="w-full border border-gray-300 px-4 py-2 rounded-lg resize-none" placeholder="Voeg een opmerking toe..."></textarea>
+                         </div>
+                         <button onclick="schrijfLeerlingIn()" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
                              Inschrijven
                          </button>
                     </div>
@@ -255,6 +261,19 @@
         </div>
     </div>
 
+    <div id="opmerkingModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 class="text-lg font-bold mb-4" id="opmerkingModalTitel">Bewerk Opmerking</h3>
+            <input type="hidden" id="opmerkingModalLeerling">
+            <input type="hidden" id="opmerkingModalToets">
+            <textarea id="opmerkingModalTekst" rows="4" class="w-full border border-gray-300 p-2 rounded-lg"></textarea>
+            <div class="flex justify-end space-x-4 mt-4">
+                <button type="button" onclick="document.getElementById('opmerkingModal').classList.add('hidden')" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400">Annuleren</button>
+                <button type="button" onclick="opslaanOpmerkingCoordinator()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Opslaan</button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         // Bestaande DOM elementen
@@ -267,6 +286,7 @@
         const toetsSelect = document.getElementById('toetsSelect');
         const globalInschrijvingenCheckbox = document.getElementById('globalInschrijvingen');
         const geenInschrijvingenText = document.getElementById('geenInschrijvingen');
+        const inschrijvingOpmerkingCoordinator = document.getElementById('inschrijvingOpmerkingCoordinator');
 
         let sorteerRichting = {};
 
@@ -369,11 +389,16 @@
                 leerlingInschrijving.toetsen.forEach(toetsObject => {
                     const toetsTitel = toetsObject.titel;
                     const ingeschrevenDoor = toetsObject.ingeschrevenDoor || 'Leerling';
+                    const opmerkingCoordinator = toetsObject.opmerkingen?.coordinator || '';
+                    const opmerkingLeerling = toetsObject.opmerkingen?.leerling || '';
+                    
                     losseInschrijvingen.push({
                         leerling: leerlingInschrijving.naam,
                         klas: leerlingInschrijving.klas,
                         toets: toetsTitel,
-                        ingeschrevenDoor: ingeschrevenDoor
+                        ingeschrevenDoor: ingeschrevenDoor,
+                        opmerkingCoordinator: opmerkingCoordinator,
+                        opmerkingLeerling: opmerkingLeerling
                     });
                     toetsTeller[toetsTitel] = (toetsTeller[toetsTitel] || 0) + 1;
                 });
@@ -404,10 +429,17 @@
                         <td class="py-3 px-4">${inschrijving.klas}</td>
                         <td class="py-3 px-4">${inschrijving.toets}</td>
                         <td class="py-3 px-4">${inschrijving.ingeschrevenDoor}</td>
+                        <td class="py-3 px-4 whitespace-pre-wrap">${inschrijving.opmerkingCoordinator}</td>
+                        <td class="py-3 px-4 whitespace-pre-wrap">${inschrijving.opmerkingLeerling}</td>
                         <td class="py-3 px-4">
-                            <button onclick="verwijderInschrijving('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">
-                                Verwijder
-                            </button>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="bewerkOpmerkingCoordinator('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-indigo-500 text-white px-3 py-1 text-sm rounded-md hover:bg-indigo-600 transition-colors">
+                                    ✏️
+                                </button>
+                                <button onclick="verwijderInschrijving('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">
+                                    Verwijder
+                                </button>
+                            </div>
                         </td>
                     `;
                     inschrijvingLijst.appendChild(tr);
@@ -458,6 +490,7 @@
         function schrijfLeerlingIn() {
             const geselecteerdeLeerling = leerlingSelect.value;
             const geselecteerdeToets = toetsSelect.value;
+            const opmerking = inschrijvingOpmerkingCoordinator.value.trim();
             
             if (!geselecteerdeLeerling || !geselecteerdeToets) {
                 alert("⚠️ Selecteer een leerling én een toets.");
@@ -469,7 +502,11 @@
 
             const nieuweToets = {
                 titel: geselecteerdeToets,
-                ingeschrevenDoor: 'Coördinator'
+                ingeschrevenDoor: 'Coördinator',
+                opmerkingen: {
+                    coordinator: opmerking,
+                    leerling: ''
+                }
             };
 
             if (leerlingInschrijving) {
@@ -493,8 +530,42 @@
                 document.getElementById('inschrijvingFeedback').classList.add('hidden');
                 toonInschrijvingen();
             }, 1500);
+            inschrijvingOpmerkingCoordinator.value = '';
         }
 
+        // Bewerken opmerkingen coördinator
+        function bewerkOpmerkingCoordinator(leerlingNaam, toetsTitel) {
+            const alleInschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
+            const leerlingInschrijving = alleInschrijvingen.find(i => i.naam === leerlingNaam);
+            const toetsObject = leerlingInschrijving?.toetsen.find(t => t.titel === toetsTitel);
+
+            if (!toetsObject) return;
+
+            document.getElementById('opmerkingModalTitel').textContent = `Bewerk opmerking voor ${leerlingNaam}`;
+            document.getElementById('opmerkingModalLeerling').value = leerlingNaam;
+            document.getElementById('opmerkingModalToets').value = toetsTitel;
+            document.getElementById('opmerkingModalTekst').value = toetsObject.opmerkingen?.coordinator || '';
+            document.getElementById('opmerkingModal').classList.remove('hidden');
+        }
+
+        function opslaanOpmerkingCoordinator() {
+            const leerlingNaam = document.getElementById('opmerkingModalLeerling').value;
+            const toetsTitel = document.getElementById('opmerkingModalToets').value;
+            const nieuweOpmerking = document.getElementById('opmerkingModalTekst').value;
+
+            const alleInschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
+            const leerlingInschrijving = alleInschrijvingen.find(i => i.naam === leerlingNaam);
+            const toetsObject = leerlingInschrijving?.toetsen.find(t => t.titel === toetsTitel);
+
+            if (toetsObject) {
+                if (!toetsObject.opmerkingen) toetsObject.opmerkingen = {};
+                toetsObject.opmerkingen.coordinator = nieuweOpmerking;
+                localStorage.setItem('inschrijvingen', JSON.stringify(alleInschrijvingen));
+                document.getElementById('opmerkingModal').classList.add('hidden');
+                toonInschrijvingen();
+            }
+        }
+        
         // Account toevoegen
         document.getElementById('accountForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -592,13 +663,15 @@
 
         // CSV export
         function exportCSV() {
-            let csv = "Naam,Klas,Toets,Ingeschreven door\n";
+            let csv = "Naam,Klas,Toets,Ingeschreven door,Opmerking Coördinator,Opmerking Leerling\n";
             const inschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
             inschrijvingen.forEach(i => {
                 i.toetsen.forEach(toetsObject => {
                     const toetsTitel = toetsObject.titel;
                     const ingeschrevenDoor = toetsObject.ingeschrevenDoor || 'Leerling';
-                    csv += `"${i.naam}","${i.klas}","${toetsTitel}","${ingeschrevenDoor}"\n`;
+                    const opmerkingCoordinator = toetsObject.opmerkingen?.coordinator || '';
+                    const opmerkingLeerling = toetsObject.opmerkingen?.leerling || '';
+                    csv += `"${i.naam}","${i.klas}","${toetsTitel}","${ingeschrevenDoor}","${opmerkingCoordinator.replace(/"/g, '""')}","${opmerkingLeerling.replace(/"/g, '""')}"\n`;
                 });
             });
             const blob = new Blob([csv], { type: 'text/csv' });
@@ -756,7 +829,7 @@
         function verwijderInschrijving(leerlingNaam, toetsTitel) {
             if (!confirm(`Weet je zeker dat je de inschrijving voor '${toetsTitel}' van leerling '${leerlingNaam}' wilt verwijderen?`)) return;
             
-            const alleInschrijvingen = JSON.PArse(localStorage.getItem('inschrijvingen') || '[]');
+            const alleInschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
             const inschrijvingIndex = alleInschrijvingen.findIndex(i => i.naam === leerlingNaam);
             if (inschrijvingIndex !== -1) {
                 const updatedToetsen = alleInschrijvingen[inschrijvingIndex].toetsen.filter(toets => toets.titel !== toetsTitel);
