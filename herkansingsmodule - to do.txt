@@ -13,6 +13,8 @@ Dashboard:
 		aantal lokaal op basisi van aantal leerlingen
 
 	-	Statistieken per Leerling.
+
+	- Coordinator kan individeuel inschrijving verwijderen
 	
 	Export  toetsoverzicht pdf (totaal)
 
@@ -122,6 +124,7 @@ _Totaal: ± 7 weken (flexibel afhankelijk van teamgrootte)_
 
 
 	
+
 
 
 
