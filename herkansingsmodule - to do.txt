@@ -25,7 +25,7 @@ Accounts: Koppelen met school?
 Leerling: na opnieuw inloggen krijgt weer overzicht van eerder gemaakte keuzes
 		Niet meer dan twee toetsen
 		Niet meerdere keren dezelfde toets
-Dealine toets niet niet te kiezen
+	na Dealine toets niet niet te kiezen (werkt nog niet)
 
 Deadline voor inschrijven toevoegen
 
@@ -118,4 +118,5 @@ _Totaal: ± 7 weken (flexibel afhankelijk van teamgrootte)_
 
 
 	
+
 
