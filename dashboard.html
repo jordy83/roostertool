@@ -1,11 +1,248 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    </head>
-<body class="bg-gray-50 text-gray-800 antialiased">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Beheeromgeving</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            text-transform: uppercase;
+        }
+        .status-pending {
+            background-color: #fcd34d; /* yellow-300 */
+            color: #78350f; /* amber-900 */
+        }
+        .status-approved {
+            background-color: #a7f3d0; /* green-200 */
+            color: #065f46; /* green-800 */
+        }
+        .status-rejected {
+            background-color: #fecaca; /* red-200 */
+            color: #991b1b; /* red-800 */
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased font-sans">
 
-    <div class="flex justify-end mt-4">
-        <button onclick="slaInschrijvingenOp()" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors">Opslaan</button>
+    <div class="min-h-screen flex flex-col items-center py-10">
+        <div class="bg-white shadow-xl rounded-lg p-6 w-full max-w-7xl">
+            <h1 class="text-3xl font-bold text-center text-gray-900 mb-6">Administratief Dashboard</h1>
+
+            <div class="flex border-b border-gray-200 mb-6">
+                <button id="tab-accounts" onclick="showTab('accounts')" class="tab-link px-4 py-2 text-center text-sm font-medium leading-5 rounded-t-lg focus:outline-none transition-colors border-b-2 border-transparent hover:border-gray-300">
+                    Accounts
+                </button>
+                <button id="tab-toetsen" onclick="showTab('toetsen')" class="tab-link px-4 py-2 text-center text-sm font-medium leading-5 rounded-t-lg focus:outline-none transition-colors border-b-2 border-transparent hover:border-gray-300">
+                    Toetsen
+                </button>
+                <button id="tab-inschrijvingen" onclick="showTab('inschrijvingen')" class="tab-link px-4 py-2 text-center text-sm font-medium leading-5 rounded-t-lg focus:outline-none transition-colors border-b-2 border-transparent hover:border-gray-300">
+                    Inschrijvingen & Statistieken
+                </button>
+                <button id="tab-instellingen" onclick="showTab('instellingen')" class="tab-link px-4 py-2 text-center text-sm font-medium leading-5 rounded-t-lg focus:outline-none transition-colors border-b-2 border-transparent hover:border-gray-300">
+                    Instellingen
+                </button>
+            </div>
+
+            <div id="accounts" class="tab-content">
+                <div class="mb-6">
+                    <h2 class="text-xl font-semibold mb-4">Leerling Accounts</h2>
+                    <div class="mb-4">
+                        <input type="text" id="zoekInput" placeholder="Zoek op naam..." class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <ul id="accountLijst" class="space-y-4"></ul>
+                </div>
+
+                <div class="mb-6 border-t border-gray-200 pt-6">
+                    <h2 class="text-xl font-semibold mb-4">Nieuw Account Toevoegen</h2>
+                    <form id="accountForm" class="space-y-4">
+                        <input type="text" id="nieuweNaam" placeholder="Naam" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="nieuweKlas" placeholder="Klas (bijv. 4H)" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="email" id="nieuwEmail" placeholder="E-mail" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="password" id="nieuwWachtwoord" placeholder="Wachtwoord" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">Account Toevoegen</button>
+                        <p id="toevoegFeedback" class="text-green-600 text-center mt-2 hidden">✅ Account toegevoegd.</p>
+                    </form>
+                </div>
+
+                <div class="border-t border-gray-200 pt-6 flex justify-between space-x-2">
+                    <button onclick="stuurWachtwoorden('geselecteerd')" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors flex-grow">Wachtwoorden geselecteerde accounts versturen</button>
+                    <button onclick="stuurWachtwoorden('alle')" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors flex-grow">Wachtwoorden alle accounts versturen</button>
+                    <button onclick="resetAccounts()" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors flex-grow">Alles Resetten</button>
+                </div>
+            </div>
+
+            <div id="toetsen" class="tab-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-xl font-semibold mb-4">Aangemaakte Toetsen</h2>
+                    <ul id="aangemaakteToetsenLijst" class="space-y-4">
+                        <li>Nog geen toetsen aangemaakt.</li>
+                    </ul>
+                </div>
+
+                <div class="mb-6 border-t border-gray-200 pt-6">
+                    <h2 class="text-xl font-semibold mb-4">Nieuwe Toets Aanmaken</h2>
+                    <form id="toetsForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <input type="text" id="toetsVak" placeholder="Vak" required class="col-span-1 md:col-span-2 lg:col-span-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="toetsNr" placeholder="Toetsnr." required class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select id="toetsSoort" required class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Soort toets</option>
+                            <option value="Herkansing">Herkansing</option>
+                            <option value="Eindtoets">Eindtoets</option>
+                            <option value="Repetitie">Repetitie</option>
+                        </select>
+                        <input type="text" id="toetsDuur" placeholder="Duur (minuten)" required class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="toetsKlas" placeholder="Klas (bijv. 4H)" required class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="datetime-local" id="toetsDeadline" class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <div class="flex items-center space-x-2">
+                            <input type="checkbox" id="toetsGesloten" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="toetsGesloten" class="text-sm font-medium text-gray-700">Gesloten voor inschrijvingen</label>
+                        </div>
+                        <button type="submit" class="col-span-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">Toets Aanmaken</button>
+                        <p id="toetsFeedback" class="text-green-600 text-center mt-2 hidden col-span-full">✅ Toets succesvol aangemaakt.</p>
+                    </form>
+                </div>
+                
+                <div class="border-t border-gray-200 pt-6 flex justify-between space-x-4 items-center">
+                    <div class="flex items-center space-x-2">
+                        <label for="csvFileInput" class="bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600 transition-colors cursor-pointer">Importeer CSV</label>
+                        <input type="file" id="csvFileInput" accept=".csv" class="hidden">
+                        <button id="importeerBtn" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors">Importeer</button>
+                    </div>
+                    <p id="importFeedback" class="text-green-600 text-center mt-2 hidden">✅ Toetsen succesvol geïmporteerd.</p>
+                    <button onclick="resetToetsen()" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors">Alles Resetten</button>
+                </div>
+            </div>
+
+            <div id="inschrijvingen" class="tab-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-xl font-semibold mb-4">Handmatig inschrijven</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                        <div class="col-span-1">
+                            <label for="leerlingSelect" class="block text-sm font-medium text-gray-700">Selecteer Leerling</label>
+                            <select id="leerlingSelect" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"></select>
+                        </div>
+                        <div class="col-span-1">
+                            <label for="toetsSelect" class="block text-sm font-medium text-gray-700">Selecteer Toets</label>
+                            <select id="toetsSelect" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"></select>
+                        </div>
+                        <div class="col-span-1">
+                            <label for="inschrijvingOpmerkingCoordinator" class="block text-sm font-medium text-gray-700">Opmerking Coördinator</label>
+                            <input type="text" id="inschrijvingOpmerkingCoordinator" placeholder="Optionele opmerking" class="mt-1 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <button onclick="schrijfLeerlingIn()" class="col-span-1 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">Schrijf in</button>
+                    </div>
+                    <p id="inschrijvingFeedback" class="text-green-600 text-center mt-2 hidden">✅ Handmatige inschrijving succesvol.</p>
+                </div>
+                
+                <div class="mb-6">
+                    <h2 class="text-xl font-semibold mb-4">Alle inschrijvingen</h2>
+                    <table class="min-w-full bg-white border-collapse">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th onclick="sorteerTabel('leerling')" class="py-3 px-4 text-left text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-200">Leerling</th>
+                                <th onclick="sorteerTabel('klas')" class="py-3 px-4 text-left text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-200">Klas</th>
+                                <th onclick="sorteerTabel('toets')" class="py-3 px-4 text-left text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-200">Toets</th>
+                                <th onclick="sorteerTabel('ingeschrevenDoor')" class="py-3 px-4 text-left text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-200">Ingeschreven door</th>
+                                <th onclick="sorteerTabel('status')" class="py-3 px-4 text-left text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-200">Status</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">Opmerking Coördinator</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">Opmerking Leerling</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">Acties</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inschrijvingLijst" class="divide-y divide-gray-200"></tbody>
+                    </table>
+                    <p id="geenInschrijvingen" class="text-center text-gray-500 mt-4 hidden">Geen inschrijvingen gevonden.</p>
+                </div>
+                
+                <div class="mt-6 border-t border-gray-200 pt-6">
+                    <h2 class="text-xl font-semibold mb-4">Statistieken</h2>
+                    <ul id="statistiekLijst" class="space-y-2 text-gray-700"></ul>
+                </div>
+
+                <div class="flex justify-between mt-6 border-t border-gray-200 pt-6 space-x-4">
+                    <button onclick="exportCSV()" class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors">Exporteer CSV</button>
+                    <button onclick="resetInschrijvingen()" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors">Alles Resetten</button>
+                </div>
+            </div>
+
+            <div id="instellingen" class="tab-content hidden">
+                <h2 class="text-xl font-semibold mb-4">Globale Instellingen</h2>
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="globalInschrijvingen" onchange="slaGlobaleInstellingenOp()" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="globalInschrijvingen" class="text-sm font-medium text-gray-700">Inschrijvingen sluiten voor alle leerlingen</label>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="accountModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg p-6 w-full max-w-lg shadow-xl">
+                <div class="flex justify-between items-center pb-3">
+                    <h3 class="text-lg font-semibold text-gray-900">Account Bewerken</h3>
+                    <button onclick="document.getElementById('accountModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 focus:outline-none">&times;</button>
+                </div>
+                <form id="editAccountForm" class="space-y-4">
+                    <input type="text" id="editNaam" placeholder="Naam" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="editKlas" placeholder="Klas" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="email" id="editEmail" placeholder="E-mail" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="password" id="editWachtwoord" placeholder="Nieuw wachtwoord (optioneel)" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">Opslaan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toetsModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg p-6 w-full max-w-lg shadow-xl">
+                <div class="flex justify-between items-center pb-3">
+                    <h3 class="text-lg font-semibold text-gray-900">Toets Bewerken</h3>
+                    <button onclick="document.getElementById('toetsModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 focus:outline-none">&times;</button>
+                </div>
+                <form id="editToetsForm" class="space-y-4">
+                    <input type="text" id="editVak" placeholder="Vak" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="editToetsnr" placeholder="Toetsnr." required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="editSoort" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="Herkansing">Herkansing</option>
+                        <option value="Eindtoets">Eindtoets</option>
+                        <option value="Repetitie">Repetitie</option>
+                    </select>
+                    <input type="text" id="editDuur" placeholder="Duur (minuten)" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="editKlas" placeholder="Klas (bijv. 4H)" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="datetime-local" id="editDeadline" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="flex items-center space-x-2">
+                        <input type="checkbox" id="editToetsGesloten" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="editToetsGesloten" class="text-sm font-medium text-gray-700">Gesloten voor inschrijvingen</label>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">Opslaan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="opmerkingModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg p-6 w-full max-w-lg shadow-xl">
+                <div class="flex justify-between items-center pb-3">
+                    <h3 id="opmerkingModalTitel" class="text-lg font-semibold text-gray-900">Opmerking Bewerken</h3>
+                    <button onclick="document.getElementById('opmerkingModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 focus:outline-none">&times;</button>
+                </div>
+                <form id="editOpmerkingForm" class="space-y-4">
+                    <input type="hidden" id="opmerkingModalLeerling">
+                    <input type="hidden" id="opmerkingModalToets">
+                    <textarea id="opmerkingModalTekst" rows="4" placeholder="Opmerking" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    <button type="button" onclick="opslaanOpmerkingCoordinator()" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">Opslaan</button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -347,19 +584,30 @@
 
         function toonInschrijvingen() {
             const inschrijvingen = getFromLocalStorage('inschrijvingen');
+            const toetsTeller = {};
             const losseInschrijvingen = [];
 
             inschrijvingen.forEach(leerlingInschrijving => {
                 leerlingInschrijving.toetsen.forEach(toetsObject => {
+                    const toetsTitel = toetsObject.titel;
+                    const ingeschrevenDoor = toetsObject.ingeschrevenDoor || 'Leerling';
+                    const opmerkingCoordinator = toetsObject.opmerkingen?.coordinator || '';
+                    const opmerkingLeerling = toetsObject.opmerkingen?.leerling || '';
+                    const status = toetsObject.status || 'pending';
+                    
                     losseInschrijvingen.push({
                         leerling: leerlingInschrijving.naam,
                         klas: leerlingInschrijving.klas,
-                        toets: toetsObject.titel,
-                        ingeschrevenDoor: toetsObject.ingeschrevenDoor || 'Leerling',
-                        opmerkingCoordinator: toetsObject.opmerkingen?.coordinator || '',
-                        opmerkingLeerling: toetsObject.opmerkingen?.leerling || '',
-                        bevroren: toetsObject.bevroren || false,
+                        toets: toetsTitel,
+                        ingeschrevenDoor: ingeschrevenDoor,
+                        opmerkingCoordinator: opmerkingCoordinator,
+                        opmerkingLeerling: opmerkingLeerling,
+                        status: status
                     });
+                    
+                    if (status === 'approved') {
+                        toetsTeller[toetsTitel] = (toetsTeller[toetsTitel] || 0) + 1;
+                    }
                 });
             });
 
@@ -380,6 +628,31 @@
             } else {
                 geenInschrijvingenText.classList.add('hidden');
                 gesorteerdeLijst.forEach((inschrijving) => {
+                    let statusBadgeClass = '';
+                    let statusText = '';
+                    let actiesHtml = '';
+                    switch (inschrijving.status) {
+                        case 'approved':
+                            statusBadgeClass = 'status-approved';
+                            statusText = 'Goedgekeurd';
+                            actiesHtml = `<button onclick="verwijderInschrijving('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijder</button>`;
+                            break;
+                        case 'rejected':
+                            statusBadgeClass = 'status-rejected';
+                            statusText = 'Afgewezen';
+                            actiesHtml = `<button onclick="verwijderInschrijving('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijder</button>`;
+                            break;
+                        case 'pending':
+                        default:
+                            statusBadgeClass = 'status-pending';
+                            statusText = 'In afwachting';
+                            actiesHtml = `
+                                <button onclick="keurInschrijvingGoed('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-green-500 text-white px-3 py-1 text-sm rounded-md hover:bg-green-600 transition-colors">Goedkeuren</button>
+                                <button onclick="wijsInschrijvingAf('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Afwijzen</button>
+                            `;
+                            break;
+                    }
+
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-gray-50";
                     tr.innerHTML = `
@@ -387,9 +660,7 @@
                         <td class="py-3 px-4">${inschrijving.klas}</td>
                         <td class="py-3 px-4">${inschrijving.toets}</td>
                         <td class="py-3 px-4">${inschrijving.ingeschrevenDoor}</td>
-                        <td class="py-3 px-4">
-                            <input type="checkbox" onchange="markeerAlsGewijzigd()" data-leerling="${inschrijving.leerling}" data-toets="${inschrijving.toets}" ${inschrijving.bevroren ? 'checked' : ''} class="bevries-checkbox h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                        </td>
+                        <td class="py-3 px-4"><span class="status-badge ${statusBadgeClass}">${statusText}</span></td>
                         <td class="py-3 px-4 whitespace-pre-wrap">
                             <div class="flex items-center space-x-2">
                                 <span>${inschrijving.opmerkingCoordinator}</span>
@@ -397,19 +668,20 @@
                             </div>
                         </td>
                         <td class="py-3 px-4 whitespace-pre-wrap">${inschrijving.opmerkingLeerling}</td>
-                        <td class="py-3 px-4">
-                            <button onclick="verwijderInschrijving('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijder</button>
-                        </td>
+                        <td class="py-3 px-4">${actiesHtml}</td>
                     `;
                     inschrijvingLijst.appendChild(tr);
                 });
             }
-        }
-        
-        // Functie om wijzigingen te markeren voor opslag
-        let wijzigingenInWachtrij = false;
-        function markeerAlsGewijzigd() {
-            wijzigingenInWachtrij = true;
+
+            // Statistieken bijwerken
+            statistiekLijst.innerHTML = '';
+            const sortedToetsen = Object.entries(toetsTeller).sort(([, countA], [, countB]) => countB - countA);
+            sortedToetsen.forEach(([toets, count]) => {
+                const li = document.createElement('li');
+                li.textContent = `${toets}: ${count} goedgekeurde inschrijvingen`;
+                statistiekLijst.appendChild(li);
+            });
         }
 
         // Functie voor het sorteren van de tabel
@@ -460,11 +732,11 @@
             leerlingInschrijving.toetsen.push({
                 titel: toetsTitel,
                 ingeschrevenDoor: 'Coördinator',
+                status: 'approved',
                 opmerkingen: {
                     coordinator: opmerkingCoordinator,
                     leerling: ''
-                },
-                bevroren: true // Handmatige inschrijvingen zijn standaard bevroren
+                }
             });
 
             saveToLocalStorage('inschrijvingen', inschrijvingen);
@@ -475,29 +747,32 @@
             setTimeout(() => inschrijvingFeedback.classList.add('hidden'), 3000);
         }
 
-        // Functie om de "bevries"-status te verwerken en op te slaan
-        function slaInschrijvingenOp() {
-            const checkboxes = document.querySelectorAll('.bevries-checkbox');
+        // Functie om inschrijving goed te keuren
+        function keurInschrijvingGoed(leerlingNaam, toetsTitel) {
             let inschrijvingen = getFromLocalStorage('inschrijvingen');
-
-            checkboxes.forEach(checkbox => {
-                const leerlingNaam = checkbox.dataset.leerling;
-                const toetsTitel = checkbox.dataset.toets;
-                const isBevroren = checkbox.checked;
-                
-                const inschrijving = inschrijvingen.find(i => i.naam === leerlingNaam);
-                if (inschrijving) {
-                    const toets = inschrijving.toetsen.find(t => t.titel === toetsTitel);
-                    if (toets) {
-                        toets.bevroren = isBevroren;
-                    }
+            const inschrijving = inschrijvingen.find(i => i.naam === leerlingNaam);
+            if (inschrijving) {
+                const toets = inschrijving.toetsen.find(t => t.titel === toetsTitel);
+                if (toets) {
+                    toets.status = 'approved';
+                    saveToLocalStorage('inschrijvingen', inschrijvingen);
+                    toonInschrijvingen();
                 }
-            });
+            }
+        }
 
-            saveToLocalStorage('inschrijvingen', inschrijvingen);
-            alert("Wijzigingen succesvol opgeslagen.");
-            toonInschrijvingen();
-            wijzigingenInWachtrij = false;
+        // Functie om inschrijving af te wijzen
+        function wijsInschrijvingAf(leerlingNaam, toetsTitel) {
+            let inschrijvingen = getFromLocalStorage('inschrijvingen');
+            const inschrijving = inschrijvingen.find(i => i.naam === leerlingNaam);
+            if (inschrijving) {
+                const toets = inschrijving.toetsen.find(t => t.titel === toetsTitel);
+                if (toets) {
+                    toets.status = 'rejected';
+                    saveToLocalStorage('inschrijvingen', inschrijvingen);
+                    toonInschrijvingen();
+                }
+            }
         }
 
         // Functie om inschrijving te verwijderen
@@ -566,7 +841,7 @@
         // Functie om CSV te exporteren
         function exportCSV() {
             const inschrijvingen = getFromLocalStorage('inschrijvingen');
-            const headers = ["Leerling", "Klas", "Toets", "Ingeschreven door", "Bevroren", "Opmerking Coördinator", "Opmerking Leerling"];
+            const headers = ["Leerling", "Klas", "Toets", "Ingeschreven door", "Status", "Opmerking Coördinator", "Opmerking Leerling"];
             
             let csvContent = headers.join(";") + "\n";
             
@@ -577,7 +852,7 @@
                         `"${leerlingInschrijving.klas}"`,
                         `"${toetsObject.titel}"`,
                         `"${toetsObject.ingeschrevenDoor || 'Leerling'}"`,
-                        `"${toetsObject.bevroren ? 'Ja' : 'Nee'}"`,
+                        `"${toetsObject.status || 'pending'}"`,
                         `"${(toetsObject.opmerkingen?.coordinator || '').replace(/"/g, '""')}"`,
                         `"${(toetsObject.opmerkingen?.leerling || '').replace(/"/g, '""')}"`
                     ];
