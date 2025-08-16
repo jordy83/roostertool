@@ -195,7 +195,10 @@
         const aangemaakteToetsenLijst = document.getElementById('aangemaakteToetsenLijst');
         
         // Functie voor tab navigatie
+        let huidigeTab = 'accounts';
+
         function showTab(tabId) {
+            huidigeTab = tabId;
             const tabs = document.querySelectorAll('.tab-content');
             const tabLinks = document.querySelectorAll('.tab-link');
 
@@ -301,7 +304,11 @@
             if (!naam || !klas || !wachtwoord) return alert("⚠️ Vul alle velden in.");
             localStorage.setItem('account_' + naam, JSON.stringify({ naam, klas, wachtwoord }));
             document.getElementById('toevoegFeedback').classList.remove('hidden');
-            setTimeout(() => { location.reload(); showTab('accounts'); }, 1500);
+            setTimeout(() => { 
+                document.getElementById('toevoegFeedback').classList.add('hidden');
+                toonAccounts();
+            }, 1500);
+            this.reset();
         });
         
         // Handmatig Toets toevoegen
@@ -320,7 +327,11 @@
             bestaandeToetsen.push(nieuweToets);
             localStorage.setItem('toetsen', JSON.stringify(bestaandeToetsen));
             document.getElementById('toetsFeedback').classList.remove('hidden');
-            setTimeout(() => { location.reload(); showTab('toetsen'); }, 1500);
+            setTimeout(() => { 
+                document.getElementById('toetsFeedback').classList.add('hidden');
+                toonToetsen();
+            }, 1500);
+            this.reset();
         });
 
         // === CSV IMPORTEER FUNCTIONALITEIT ===
@@ -364,7 +375,10 @@
                 const gecombineerdeToetsen = bestaandeToetsen.concat(nieuweToetsen);
                 localStorage.setItem('toetsen', JSON.stringify(gecombineerdeToetsen));
                 document.getElementById('importFeedback').classList.remove('hidden');
-                setTimeout(() => { location.reload(); showTab('toetsen'); }, 1500);
+                setTimeout(() => { 
+                    document.getElementById('importFeedback').classList.add('hidden');
+                    toonToetsen();
+                }, 1500);
             };
             reader.onerror = function() {
                 alert('⚠️ Er is een fout opgetreden bij het lezen van het bestand.');
@@ -419,13 +433,13 @@
             localStorage.setItem('account_' + nieuweNaam, JSON.stringify(accountData));
 
             document.getElementById('accountModal').classList.add('hidden');
-            location.reload();
+            toonAccounts();
         });
 
         function verwijderAccount(naam) {
             if (confirm(`Weet je zeker dat je account van ${naam} wilt verwijderen?`)) {
                 localStorage.removeItem('account_' + naam);
-                location.reload();
+                toonAccounts();
             }
         }
 
@@ -455,7 +469,7 @@
             
             localStorage.setItem('toetsen', JSON.stringify(toetsen));
             document.getElementById('toetsModal').classList.add('hidden');
-            location.reload();
+            toonToetsen();
         });
 
         function verwijderToets(index) {
@@ -463,7 +477,7 @@
                 const toetsen = JSON.parse(localStorage.getItem('toetsen') || '[]');
                 toetsen.splice(index, 1);
                 localStorage.setItem('toetsen', JSON.stringify(toetsen));
-                location.reload();
+                toonToetsen();
             }
         }
 
@@ -473,7 +487,7 @@
                 const inschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
                 inschrijvingen.splice(index, 1);
                 localStorage.setItem('inschrijvingen', JSON.stringify(inschrijvingen));
-                location.reload();
+                toonInschrijvingen();
             }
         }
 
@@ -486,21 +500,21 @@
                 }
             });
             alert('✅ Accounts zijn succesvol verwijderd.');
-            location.reload();
+            toonAccounts();
         }
 
         function resetInschrijvingen() {
             if (!confirm("Weet u zeker dat u alle inschrijvingen wilt verwijderen? Dit kan niet ongedaan worden gemaakt.")) return;
             localStorage.removeItem('inschrijvingen');
             alert('✅ Inschrijvingen zijn succesvol verwijderd.');
-            location.reload();
+            toonInschrijvingen();
         }
 
         function resetToetsen() {
             if (!confirm("Weet u zeker dat u alle toetsen wilt verwijderen? Dit kan niet ongedaan worden gemaakt.")) return;
             localStorage.removeItem('toetsen');
             alert('✅ Toetsen zijn succesvol verwijderd.');
-            location.reload();
+            toonToetsen();
         }
     </script>
 </body>
