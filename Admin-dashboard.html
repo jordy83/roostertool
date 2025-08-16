@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - RoosterTool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .toggle-switch { accent-color: #2563eb; }
+        .tab-link.active { border-color: #2563eb; color: #2563eb; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+    <script>
+      function showTab(tab) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.getElementById(tab).classList.add('active');
+        document.querySelectorAll('.tab-link').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + tab).classList.add('active');
+      }
+      document.addEventListener("DOMContentLoaded", () => showTab('projecten'));
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased">
+
+<header class="bg-white shadow-md sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <h1 class="text-2xl font-bold text-blue-600">RoosterTool Admin</h1>
+        </div>
+        <nav class="flex space-x-6">
+            <a href="#" onclick="showTab('projecten')" id="tab-projecten" class="tab-link text-gray-600 hover:text-blue-600 font-medium transition-colors border-b-2 border-transparent pb-2">Projecten</a>
+            <a href="#" onclick="showTab('coordinatoren')" id="tab-coordinatoren" class="tab-link text-gray-600 hover:text-blue-600 font-medium transition-colors border-b-2 border-transparent pb-2">Coördinatoren</a>
+            <a href="#" onclick="showTab('instellingen')" id="tab-instellingen" class="tab-link text-gray-600 hover:text-blue-600 font-medium transition-colors border-b-2 border-transparent pb-2">Instellingen</a>
+        </nav>
+        <a href="index.html" class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-700 transition-colors duration-200 ease-in-out">
+            Uitloggen
+        </a>
+    </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-6 py-8 space-y-12">
+
+    <!-- Projecten Tab -->
+    <section id="projecten" class="tab-content bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Projectbeheer</h2>
+        <form class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block font-medium mb-2">Projectnaam</label>
+                    <input type="text" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Naam van het project" />
+                </div>
+                <div>
+                    <label class="block font-medium mb-2">Koppel coördinator</label>
+                    <select class="w-full border-gray-300 rounded-md shadow-sm">
+                        <option>-- Selecteer coördinator --</option>
+                        <option>Coördinator 1</option>
+                        <option>Coördinator 2</option>
+                    </select>
+                </div>
+            </div>
+            <hr class="my-6" />
+            <h3 class="text-lg font-semibold text-gray-800">Voorwaarden & Opties</h3>
+            <div class="space-y-4">
+
+                <!-- Projectduur & Activatie -->
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="activeProject" checked>
+                    <label for="activeProject" class="font-medium">Project actief</label>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableDates">
+                    <label for="enableDates" class="font-medium">Projectduur instellen</label>
+                    <input type="date" class="border-gray-300 rounded px-2" />
+                    <span class="mx-2">t/m</span>
+                    <input type="date" class="border-gray-300 rounded px-2" />
+                </div>
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableSignup">
+                    <label for="enableSignup" class="font-medium">Inschrijfperiode instellen</label>
+                    <input type="date" class="border-gray-300 rounded px-2" />
+                    <span class="mx-2">t/m</span>
+                    <input type="date" class="border-gray-300 rounded px-2" />
+                </div>
+
+                <!-- Activiteiten-selectie -->
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableActivityLimits">
+                    <label for="enableActivityLimits" class="font-medium">Limieten aantal activiteiten</label>
+                    <input type="number" min="1" placeholder="min" class="w-16 border-gray-300 rounded px-2" />
+                    <span class="mx-2">t/m</span>
+                    <input type="number" min="1" placeholder="max" class="w-16 border-gray-300 rounded px-2" />
+                </div>
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableRounds">
+                    <label for="enableRounds" class="font-medium">Keuzerondes</label>
+                    <input type="number" min="1" placeholder="Aantal rondes" class="w-20 border-gray-300 rounded px-2" />
+                </div>
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="requireSport">
+                    <label for="requireSport" class="font-medium">Verplicht sport kiezen</label>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="requireCreative">
+                    <label for="requireCreative" class="font-medium">Verplicht creatieve activiteit kiezen</label>
+                </div>
+
+                <!-- Leeftijdsgroepen -->
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableAgeGroups">
+                    <label for="enableAgeGroups" class="font-medium">Leeftijdsgroepen instellen</label>
+                    <input type="number" min="1" placeholder="min" class="w-16 border-gray-300 rounded px-2" />
+                    <span class="mx-2">t/m</span>
+                    <input type="number" min="1" placeholder="max" class="w-16 border-gray-300 rounded px-2" />
+                    <input type="text" placeholder="Groep bv. 6-8, 9-12" class="border-gray-300 rounded px-2" />
+                </div>
+
+                <!-- Toestemming & Documentatie -->
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="requireConsent">
+                    <label for="requireConsent" class="font-medium">Ouderlijk toestemming vereist</label>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableDocUpload">
+                    <label for="enableDocUpload" class="font-medium">Documenten uploaden</label>
+                </div>
+
+                <!-- Capaciteit & Limieten -->
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableCapacityLimit">
+                    <label for="enableCapacityLimit" class="font-medium">Maximaal aantal deelnemers project</label>
+                    <input type="number" min="1" placeholder="max" class="w-16 border-gray-300 rounded px-2" />
+                </div>
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableActivityCapacity">
+                    <label for="enableActivityCapacity" class="font-medium">Maximaal aantal deelnemers per activiteit</label>
+                    <input type="number" min="1" placeholder="max" class="w-16 border-gray-300 rounded px-2" />
+                </div>
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableWaitlist">
+                    <label for="enableWaitlist" class="font-medium">Wachtlijst inschakelen</label>
+                </div>
+
+                <!-- Locatie & Logistiek -->
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableLocations">
+                    <label for="enableLocations" class="font-medium">Locaties</label>
+                    <input type="text" placeholder="Locatie(s)" class="border-gray-300 rounded px-2" />
+                </div>
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableTransportOptions">
+                    <label for="enableTransportOptions" class="font-medium">Vervoersopties</label>
+                    <input type="text" placeholder="Opties bv. bus, zelf brengen" class="border-gray-300 rounded px-2" />
+                </div>
+
+                <!-- Communicatie -->
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableNotifications">
+                    <label for="enableNotifications" class="font-medium">Automatische notificaties</label>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableNewsletter">
+                    <label for="enableNewsletter" class="font-medium">Nieuwsbrief per project</label>
+                </div>
+
+                <!-- Kosten & Betaling -->
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enablePayment">
+                    <label for="enablePayment" class="font-medium">Deelnamekosten</label>
+                    <input type="number" min="0" step="0.01" placeholder="€ per kind" class="w-24 border-gray-300 rounded px-2" />
+                    <input type="number" min="0" step="0.01" placeholder="€ per activiteit" class="w-24 border-gray-300 rounded px-2" />
+                </div>
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableDiscounts">
+                    <label for="enableDiscounts" class="font-medium">Kortingsregelingen</label>
+                </div>
+
+                <!-- Extra opties -->
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableSpecialRequests">
+                    <label for="enableSpecialRequests" class="font-medium">Speciale wensen/allergieën</label>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableExtraGuidance">
+                    <label for="enableExtraGuidance" class="font-medium">Extra begeleiding</label>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableVolunteerRoles">
+                    <label for="enableVolunteerRoles" class="font-medium">Vrijwilligersrollen aanbieden</label>
+                </div>
+
+                <!-- Activiteit-voorwaarden -->
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableActivitySchedule">
+                    <label for="enableActivitySchedule" class="font-medium">Activiteit rooster per dag/tijd</label>
+                    <input type="text" placeholder="Bv. maandag: Sport" class="border-gray-300 rounded px-2" />
+                </div>
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableActivityCombinations">
+                    <label for="enableActivityCombinations" class="font-medium">Combinaties uitsluiten</label>
+                    <input type="text" placeholder="Bv. Sport+Muziek" class="border-gray-300 rounded px-2" />
+                </div>
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="toggle-switch" id="enableActivityPrerequisites">
+                    <label for="enableActivityPrerequisites" class="font-medium">Voorwaarden per activiteit</label>
+                    <input type="text" placeholder="Bv. Muziek na Sport" class="border-gray-300 rounded px-2" />
+                </div>
+            </div>
+            <div class="mt-8 flex justify-end">
+                <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-700 transition-colors">
+                    Project opslaan
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Coördinatoren Tab -->
+    <section id="coordinatoren" class="tab-content bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Coördinatorenbeheer</h2>
+        <!-- Voorbeeld: overzicht, toevoegen/koppelen, bewerken, verwijderen -->
+        <div class="space-y-4">
+            <div class="flex items-center space-x-4">
+                <input type="text" class="border-gray-300 rounded px-2" placeholder="Naam coördinator toevoegen" />
+                <button class="bg-blue-600 text-white px-4 py-2 rounded font-semibold hover:bg-blue-700">Toevoegen</button>
+            </div>
+            <ul class="divide-y divide-gray-200">
+                <li class="py-2 flex justify-between items-center">
+                    <span>Coördinator 1</span>
+                    <button class="text-red-600 hover:underline">Verwijderen</button>
+                </li>
+                <li class="py-2 flex justify-between items-center">
+                    <span>Coördinator 2</span>
+                    <button class="text-red-600 hover:underline">Verwijderen</button>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Instellingen Tab -->
+    <section id="instellingen" class="tab-content bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Globale Instellingen</h2>
+        <div class="space-y-4">
+            <div class="flex items-center space-x-4">
+                <input type="checkbox" class="toggle-switch" id="enableGlobalNotifications">
+                <label for="enableGlobalNotifications" class="font-medium">Globale notificaties</label>
+            </div>
+            <div class="flex items-center space-x-4">
+                <input type="checkbox" class="toggle-switch" id="enableGlobalNewsletter">
+                <label for="enableGlobalNewsletter" class="font-medium">Nieuwsbrief inschakelen</label>
+            </div>
+        </div>
+    </section>
+
+</main>
+</body>
+</html>
