@@ -144,6 +144,9 @@
                     <label for="globalInschrijvingen" class="flex-grow text-lg font-semibold">Inschrijvingen globaal sluiten voor leerlingen:</label>
                     <input type="checkbox" id="globalInschrijvingen" class="h-6 w-6 text-blue-600 rounded focus:ring-blue-500">
                 </div>
+                <button onclick="slaGlobaleInstellingenOp()" class="mt-4 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                    Instellingen Opslaan
+                </button>
             </div>
 
             <div class="mt-8 pt-8 border-t border-red-200 text-center">
@@ -293,9 +296,11 @@
             globalInschrijvingenCheckbox.checked = JSON.parse(localStorage.getItem('globaleInschrijvingenGesloten') || 'false');
         });
 
-        globalInschrijvingenCheckbox.addEventListener('change', () => {
+        function slaGlobaleInstellingenOp() {
             localStorage.setItem('globaleInschrijvingenGesloten', globalInschrijvingenCheckbox.checked);
-        });
+            alert("Instellingen succesvol opgeslagen.");
+        }
+
 
         // Functie om accounts te tonen
         function toonAccounts(filter = '') {
