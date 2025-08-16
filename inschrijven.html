@@ -158,7 +158,7 @@
                             <input type="checkbox" name="toetsen" value="${toetsTitel}" 
                                 class="form-checkbox h-5 w-5 text-blue-600 rounded" 
                                 ${isIngeschreven ? 'checked' : ''}
-                                ${isGesloten || mijnIngeschrevenToetsen.length >= 2 ? 'disabled' : ''}>
+                                ${isGesloten || (mijnIngeschrevenToetsen.length >= 2 && !isIngeschreven) ? 'disabled' : ''}>
                             <span>${toetsTitel} ${statusMelding}</span>
                         </label>
                     `;
@@ -220,7 +220,7 @@
             
             if (bestaandeInschrijvingIndex !== -1) {
                 const huidigeToetsen = alleInschrijvingen[bestaandeInschrijvingIndex].toetsen;
-                const nieuweLijst = [...nieuweInschrijvingen, ...huidigeToetsen];
+                const nieuweLijst = [...huidigeToetsen, ...nieuweInschrijvingen];
                 alleInschrijvingen[bestaandeInschrijvingIndex].toetsen = [...new Set(nieuweLijst)]; // Verwijder duplicaten
             } else {
                 alleInschrijvingen.push({
