@@ -366,14 +366,16 @@
 
             // Splijt de inschrijvingen op in losse regels
             inschrijvingen.forEach(leerlingInschrijving => {
-                leerlingInschrijving.toetsen.forEach(toets => {
+                leerlingInschrijving.toetsen.forEach(toetsObject => {
+                    const toetsTitel = toetsObject.titel;
+                    const ingeschrevenDoor = toetsObject.ingeschrevenDoor || 'Leerling';
                     losseInschrijvingen.push({
                         leerling: leerlingInschrijving.naam,
                         klas: leerlingInschrijving.klas,
-                        toets: toets,
-                        ingeschrevenDoor: leerlingInschrijving.ingeschrevenDoor || 'Leerling'
+                        toets: toetsTitel,
+                        ingeschrevenDoor: ingeschrevenDoor
                     });
-                    toetsTeller[toets] = (toetsTeller[toets] || 0) + 1;
+                    toetsTeller[toetsTitel] = (toetsTeller[toetsTitel] || 0) + 1;
                 });
             });
 
@@ -465,20 +467,23 @@
             const alleInschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
             let leerlingInschrijving = alleInschrijvingen.find(i => i.naam === geselecteerdeLeerling);
 
+            const nieuweToets = {
+                titel: geselecteerdeToets,
+                ingeschrevenDoor: 'Coördinator'
+            };
+
             if (leerlingInschrijving) {
-                if (leerlingInschrijving.toetsen.includes(geselecteerdeToets)) {
+                if (leerlingInschrijving.toetsen.some(t => t.titel === geselecteerdeToets)) {
                     alert("⚠️ Deze leerling is al ingeschreven voor deze toets.");
                     return;
                 }
-                leerlingInschrijving.toetsen.push(geselecteerdeToets);
-                leerlingInschrijving.ingeschrevenDoor = 'Coördinator'; // Loggen wie de inschrijving doet
+                leerlingInschrijving.toetsen.push(nieuweToets);
             } else {
                 const leerlingData = JSON.parse(localStorage.getItem('account_' + geselecteerdeLeerling));
                 alleInschrijvingen.push({
                     naam: leerlingData.naam,
                     klas: leerlingData.klas,
-                    toetsen: [geselecteerdeToets],
-                    ingeschrevenDoor: 'Coördinator' // Loggen wie de inschrijving doet
+                    toetsen: [nieuweToets]
                 });
             }
 
@@ -587,11 +592,13 @@
 
         // CSV export
         function exportCSV() {
-            let csv = "Naam,Klas,Toetsen,Ingeschreven door\n";
+            let csv = "Naam,Klas,Toets,Ingeschreven door\n";
             const inschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
             inschrijvingen.forEach(i => {
-                i.toetsen.forEach(toets => {
-                    csv += `"${i.naam}","${i.klas}","${toets}","${i.ingeschrevenDoor || 'Leerling'}"\n`;
+                i.toetsen.forEach(toetsObject => {
+                    const toetsTitel = toetsObject.titel;
+                    const ingeschrevenDoor = toetsObject.ingeschrevenDoor || 'Leerling';
+                    csv += `"${i.naam}","${i.klas}","${toetsTitel}","${ingeschrevenDoor}"\n`;
                 });
             });
             const blob = new Blob([csv], { type: 'text/csv' });
@@ -749,15 +756,14 @@
         function verwijderInschrijving(leerlingNaam, toetsTitel) {
             if (!confirm(`Weet je zeker dat je de inschrijving voor '${toetsTitel}' van leerling '${leerlingNaam}' wilt verwijderen?`)) return;
             
-            const alleInschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
+            const alleInschrijvingen = JSON.PArse(localStorage.getItem('inschrijvingen') || '[]');
             const inschrijvingIndex = alleInschrijvingen.findIndex(i => i.naam === leerlingNaam);
-
             if (inschrijvingIndex !== -1) {
-                const updatedToetsen = alleInschrijvingen[inschrijvingIndex].toetsen.filter(toets => toets !== toetsTitel);
+                const updatedToetsen = alleInschrijvingen[inschrijvingIndex].toetsen.filter(toets => toets.titel !== toetsTitel);
                 if (updatedToetsen.length === 0) {
-                     alleInschrijvingen.splice(inschrijvingIndex, 1);
+                    alleInschrijvingen.splice(inschrijvingIndex, 1);
                 } else {
-                     alleInschrijvingen[inschrijvingIndex].toetsen = updatedToetsen;
+                    alleInschrijvingen[inschrijvingIndex].toetsen = updatedToetsen;
                 }
                 localStorage.setItem('inschrijvingen', JSON.stringify(alleInschrijvingen));
                 toonInschrijvingen();
