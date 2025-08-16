@@ -101,6 +101,7 @@
                         <input type="text" id="toetsSoort" placeholder="Soort (bijv. Repetitie)" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
                         <input type="text" id="toetsDuur" placeholder="Duur (bijv. 45 minuten)" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
                         <input type="text" id="toetsKlas" placeholder="Klas (bijv. VWO 4)" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
+                        <input type="datetime-local" id="toetsDeadline" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
                         <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
                             Toets Toevoegen
                         </button>
@@ -111,7 +112,7 @@
                 </div>
                 <div>
                     <h3 class="text-xl font-bold mb-4 text-gray-800">Importeer via CSV</h3>
-                    <p class="text-sm text-gray-600 mb-4">Zorg dat het CSV-bestand de kopjes heeft: vak,toetsnr,soort,duur,klas</p>
+                    <p class="text-sm text-gray-600 mb-4">Zorg dat het CSV-bestand de kopjes heeft: vak,toetsnr,soort,duur,klas,deadline</p>
                     <div class="flex items-center space-x-4">
                         <input type="file" id="csvFileInput" accept=".csv" class="flex-grow border rounded-lg p-2">
                         <button id="importeerBtn" class="bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
@@ -190,6 +191,7 @@
                 <input type="text" id="editSoort" placeholder="Soort" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
                 <input type="text" id="editDuur" placeholder="Duur" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
                 <input type="text" id="editKlas" placeholder="Klas" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
+                <input type="datetime-local" id="editDeadline" class="w-full border border-gray-300 px-4 py-2 rounded-lg" required/>
                 <div class="flex justify-end space-x-4 mt-4">
                     <button type="button" onclick="document.getElementById('toetsModal').classList.add('hidden')" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400">Annuleren</button>
                     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Opslaan</button>
@@ -270,7 +272,7 @@
                     const li = document.createElement('li');
                     li.className = "flex justify-between items-center mb-2";
                     li.innerHTML = `
-                        <span><strong>${toets.vak} (${toets.toetsnr})</strong> - ${toets.klas} (${toets.soort}, ${toets.duur})</span>
+                        <span><strong>${toets.vak} (${toets.toetsnr})</strong> - ${toets.klas} (${toets.soort}, ${toets.duur}) | Deadline: ${new Date(toets.deadline).toLocaleString('nl-NL')}</span>
                         <div class="space-x-2 flex">
                             <button onclick="bewerkToets(${index})" class="bg-yellow-500 text-white px-3 py-1 text-sm rounded-md hover:bg-yellow-600 transition-colors">Bewerken</button>
                             <button onclick="verwijderToets(${index})" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijderen</button>
@@ -341,11 +343,12 @@
             const soort = document.getElementById('toetsSoort').value.trim();
             const duur = document.getElementById('toetsDuur').value.trim();
             const klas = document.getElementById('toetsKlas').value.trim();
-            if (!vak || !toetsnr || !soort || !duur || !klas) {
+            const deadline = document.getElementById('toetsDeadline').value;
+            if (!vak || !toetsnr || !soort || !duur || !klas || !deadline) {
                 return alert("⚠️ Vul alle velden voor de toets in.");
             }
             const bestaandeToetsen = JSON.parse(localStorage.getItem('toetsen') || '[]');
-            const nieuweToets = { vak, toetsnr, soort, duur, klas };
+            const nieuweToets = { vak, toetsnr, soort, duur, klas, deadline };
             bestaandeToetsen.push(nieuweToets);
             localStorage.setItem('toetsen', JSON.stringify(bestaandeToetsen));
             document.getElementById('toetsFeedback').classList.remove('hidden');
@@ -373,10 +376,10 @@
                     return;
                 }
                 const headers = regels[0].trim().split(',');
-                const verwachteHeaders = ['vak', 'toetsnr', 'soort', 'duur', 'klas'];
+                const verwachteHeaders = ['vak', 'toetsnr', 'soort', 'duur', 'klas', 'deadline'];
                 const heeftAlleHeaders = verwachteHeaders.every((h, i) => headers[i] && headers[i].trim() === h);
                 if (!heeftAlleHeaders) {
-                    alert('⚠️ CSV-kopjes zijn onjuist. Vereist: vak,toetsnr,soort,duur,klas');
+                    alert('⚠️ CSV-kopjes zijn onjuist. Vereist: vak,toetsnr,soort,duur,klas,deadline');
                     return;
                 }
                 const nieuweToetsen = [];
@@ -388,7 +391,8 @@
                             toetsnr: data[1].trim(),
                             soort: data[2].trim(),
                             duur: data[3].trim(),
-                            klas: data[4].trim()
+                            klas: data[4].trim(),
+                            deadline: data[5].trim()
                         };
                         nieuweToetsen.push(toets);
                     }
@@ -534,6 +538,7 @@
             document.getElementById('editSoort').value = toets.soort;
             document.getElementById('editDuur').value = toets.duur;
             document.getElementById('editKlas').value = toets.klas;
+            document.getElementById('editDeadline').value = toets.deadline;
             document.getElementById('toetsModal').classList.remove('hidden');
         }
         
@@ -547,6 +552,7 @@
             toetsen[index].soort = document.getElementById('editSoort').value.trim();
             toetsen[index].duur = document.getElementById('editDuur').value.trim();
             toetsen[index].klas = document.getElementById('editKlas').value.trim();
+            toetsen[index].deadline = document.getElementById('editDeadline').value.trim();
             
             localStorage.setItem('toetsen', JSON.stringify(toetsen));
             document.getElementById('toetsModal').classList.add('hidden');
