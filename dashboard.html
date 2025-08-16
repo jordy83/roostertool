@@ -226,3 +226,377 @@
         document.addEventListener('DOMContentLoaded', () => {
             showTab('accounts');
         });
+
+        // Functie om accounts te tonen
+        function toonAccounts(filter = '') {
+            accountLijst.innerHTML = '';
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('account_')) {
+                    const account = JSON.parse(localStorage.getItem(key));
+                    if (account.naam.toLowerCase().includes(filter.toLowerCase())) {
+                        const li = document.createElement('li');
+                        li.className = "flex justify-between items-center mb-2";
+                        li.innerHTML = `
+                            <div class="flex items-center space-x-3">
+                                <input type="checkbox" data-account-name="${account.naam}" class="account-checkbox h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <span>
+                                    <strong>${account.naam}</strong> uit klas <em>${account.klas}</em>
+                                    <br>
+                                    <span class="text-sm text-gray-500">${account.email}</span>
+                                </span>
+                            </div>
+                            <div class="space-x-2 flex">
+                                <button onclick="resetWachtwoord('${account.naam}')" class="bg-indigo-500 text-white px-3 py-1 text-sm rounded-md hover:bg-indigo-600 transition-colors">Wachtwoord resetten</button>
+                                <button onclick="bewerkAccount('${account.naam}')" class="bg-yellow-500 text-white px-3 py-1 text-sm rounded-md hover:bg-yellow-600 transition-colors">Bewerken</button>
+                                <button onclick="verwijderAccount('${account.naam}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijderen</button>
+                            </div>
+                        `;
+                        accountLijst.appendChild(li);
+                    }
+                }
+            });
+        }
+        zoekInput.addEventListener('input', () => toonAccounts(zoekInput.value));
+        toonAccounts();
+
+        // Functie om aangemaakte toetsen te tonen
+        function toonToetsen() {
+            const toetsen = JSON.parse(localStorage.getItem('toetsen') || '[]');
+            aangemaakteToetsenLijst.innerHTML = '';
+            if (toetsen.length === 0) {
+                aangemaakteToetsenLijst.innerHTML = '<li>Nog geen toetsen aangemaakt.</li>';
+            } else {
+                toetsen.forEach((toets, index) => {
+                    const li = document.createElement('li');
+                    li.className = "flex justify-between items-center mb-2";
+                    li.innerHTML = `
+                        <span><strong>${toets.vak} (${toets.toetsnr})</strong> - ${toets.klas} (${toets.soort}, ${toets.duur})</span>
+                        <div class="space-x-2 flex">
+                            <button onclick="bewerkToets(${index})" class="bg-yellow-500 text-white px-3 py-1 text-sm rounded-md hover:bg-yellow-600 transition-colors">Bewerken</button>
+                            <button onclick="verwijderToets(${index})" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijderen</button>
+                        </div>
+                    `;
+                    aangemaakteToetsenLijst.appendChild(li);
+                });
+            }
+        }
+        toonToetsen();
+
+        // Inschrijvingen en statistieken tonen
+        function toonInschrijvingen() {
+            const inschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
+            const toetsTeller = {};
+
+            inschrijvingLijst.innerHTML = '';
+            if (inschrijvingen.length === 0) {
+                inschrijvingLijst.innerHTML = '<li>Nog geen inschrijvingen.</li>';
+            } else {
+                inschrijvingen.forEach((inschrijving, index) => {
+                    const li = document.createElement('li');
+                    li.className = "flex justify-between items-center mb-2";
+                    li.innerHTML = `
+                        <span><strong>${inschrijving.naam}</strong> (${inschrijving.klas}) heeft ingeschreven voor: <em>${inschrijving.toetsen.join(', ')}</em></span>
+                        <div class="space-x-2 flex">
+                            <button onclick="verwijderInschrijving(${index})" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijderen</button>
+                        </div>
+                    `;
+                    inschrijvingLijst.appendChild(li);
+                    inschrijving.toetsen.forEach(toets => {
+                        toetsTeller[toets] = (toetsTeller[toets] || 0) + 1;
+                    });
+                });
+            }
+
+            statistiekLijst.innerHTML = '';
+            Object.entries(toetsTeller).forEach(([toets, aantal]) => {
+                const li = document.createElement('li');
+                li.textContent = `${toets}: ${aantal} inschrijving(en)`;
+                statistiekLijst.appendChild(li);
+            });
+        }
+        toonInschrijvingen();
+
+        // Account toevoegen
+        document.getElementById('accountForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const naam = document.getElementById('nieuweNaam').value.trim();
+            const klas = document.getElementById('nieuweKlas').value.trim();
+            const email = document.getElementById('nieuwEmail').value.trim();
+            const wachtwoord = document.getElementById('nieuwWachtwoord').value;
+            if (!naam || !klas || !email || !wachtwoord) return alert("⚠️ Vul alle velden in.");
+            localStorage.setItem('account_' + naam, JSON.stringify({ naam, klas, email, wachtwoord }));
+            document.getElementById('toevoegFeedback').classList.remove('hidden');
+            setTimeout(() => { 
+                document.getElementById('toevoegFeedback').classList.add('hidden');
+                toonAccounts();
+            }, 1500);
+            this.reset();
+        });
+        
+        // Handmatig Toets toevoegen
+        document.getElementById('toetsForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const vak = document.getElementById('toetsVak').value.trim();
+            const toetsnr = document.getElementById('toetsNr').value.trim();
+            const soort = document.getElementById('toetsSoort').value.trim();
+            const duur = document.getElementById('toetsDuur').value.trim();
+            const klas = document.getElementById('toetsKlas').value.trim();
+            if (!vak || !toetsnr || !soort || !duur || !klas) {
+                return alert("⚠️ Vul alle velden voor de toets in.");
+            }
+            const bestaandeToetsen = JSON.parse(localStorage.getItem('toetsen') || '[]');
+            const nieuweToets = { vak, toetsnr, soort, duur, klas };
+            bestaandeToetsen.push(nieuweToets);
+            localStorage.setItem('toetsen', JSON.stringify(bestaandeToetsen));
+            document.getElementById('toetsFeedback').classList.remove('hidden');
+            setTimeout(() => { 
+                document.getElementById('toetsFeedback').classList.add('hidden');
+                toonToetsen();
+            }, 1500);
+            this.reset();
+        });
+
+        // === CSV IMPORTEER FUNCTIONALITEIT ===
+        document.getElementById('importeerBtn').addEventListener('click', function() {
+            const fileInput = document.getElementById('csvFileInput');
+            if (fileInput.files.length === 0) {
+                alert('⚠️ Selecteer eerst een CSV-bestand om te importeren.');
+                return;
+            }
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const csvData = event.target.result;
+                const regels = csvData.split('\n').filter(regel => regel.trim() !== '');
+                if (regels.length <= 1) {
+                    alert('⚠️ CSV-bestand is leeg of bevat alleen een kopjesrij.');
+                    return;
+                }
+                const headers = regels[0].trim().split(',');
+                const verwachteHeaders = ['vak', 'toetsnr', 'soort', 'duur', 'klas'];
+                const heeftAlleHeaders = verwachteHeaders.every((h, i) => headers[i] && headers[i].trim() === h);
+                if (!heeftAlleHeaders) {
+                    alert('⚠️ CSV-kopjes zijn onjuist. Vereist: vak,toetsnr,soort,duur,klas');
+                    return;
+                }
+                const nieuweToetsen = [];
+                for (let i = 1; i < regels.length; i++) {
+                    const data = regels[i].trim().split(',');
+                    if (data.length === headers.length) {
+                        const toets = {
+                            vak: data[0].trim(),
+                            toetsnr: data[1].trim(),
+                            soort: data[2].trim(),
+                            duur: data[3].trim(),
+                            klas: data[4].trim()
+                        };
+                        nieuweToetsen.push(toets);
+                    }
+                }
+                const bestaandeToetsen = JSON.parse(localStorage.getItem('toetsen') || '[]');
+                const gecombineerdeToetsen = bestaandeToetsen.concat(nieuweToetsen);
+                localStorage.setItem('toetsen', JSON.stringify(gecombineerdeToetsen));
+                document.getElementById('importFeedback').classList.remove('hidden');
+                setTimeout(() => { 
+                    document.getElementById('importFeedback').classList.add('hidden');
+                    toonToetsen();
+                }, 1500);
+            };
+            reader.onerror = function() {
+                alert('⚠️ Er is een fout opgetreden bij het lezen van het bestand.');
+            };
+            reader.readAsText(file);
+        });
+
+        // CSV export
+        function exportCSV() {
+            let csv = "Naam,Klas,Toetsen\n";
+            const inschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
+            inschrijvingen.forEach(i => {
+                csv += `"${i.naam}","${i.klas}","${i.toetsen.join('; ')}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'inschrijvingen.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // --- Individueel bewerken en verwijderen ---
+        
+        // Accounts
+        function bewerkAccount(naam) {
+            const account = JSON.parse(localStorage.getItem('account_' + naam));
+            document.getElementById('editNaamOrigineel').value = naam;
+            document.getElementById('editNaam').value = account.naam;
+            document.getElementById('editKlas').value = account.klas;
+            document.getElementById('editEmail').value = account.email;
+            document.getElementById('editWachtwoord').value = ''; // Wachtwoord niet pre-fillen
+            document.getElementById('accountModal').classList.remove('hidden');
+        }
+
+        document.getElementById('editAccountForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const naamOrigineel = document.getElementById('editNaamOrigineel').value;
+            const nieuweNaam = document.getElementById('editNaam').value.trim();
+            const nieuweKlas = document.getElementById('editKlas').value.trim();
+            const nieuweEmail = document.getElementById('editEmail').value.trim();
+            const nieuwWachtwoord = document.getElementById('editWachtwoord').value;
+
+            if (naamOrigineel !== nieuweNaam) {
+                 localStorage.removeItem('account_' + naamOrigineel);
+            }
+
+            const accountData = {
+                naam: nieuweNaam,
+                klas: nieuweKlas,
+                email: nieuweEmail,
+                wachtwoord: nieuwWachtwoord ? nieuwWachtwoord : (JSON.parse(localStorage.getItem('account_' + naamOrigineel))?.wachtwoord || '')
+            };
+            localStorage.setItem('account_' + nieuweNaam, JSON.stringify(accountData));
+
+            document.getElementById('accountModal').classList.add('hidden');
+            toonAccounts();
+        });
+
+        function verwijderAccount(naam) {
+            if (confirm(`Weet je zeker dat je account van ${naam} wilt verwijderen?`)) {
+                localStorage.removeItem('account_' + naam);
+                toonAccounts();
+            }
+        }
+        
+        function genereerWachtwoord() {
+            return Math.random().toString(36).substring(2, 8) + Math.random().toString(36).substring(2, 4).toUpperCase();
+        }
+
+        function resetWachtwoord(naam) {
+            if (!confirm(`Weet je zeker dat je het wachtwoord van ${naam} wilt resetten?`)) return;
+
+            const account = JSON.parse(localStorage.getItem('account_' + naam));
+            const nieuwWachtwoord = genereerWachtwoord();
+            account.wachtwoord = nieuwWachtwoord;
+            localStorage.setItem('account_' + naam, JSON.stringify(account));
+            alert(`✅ Wachtwoord van ${naam} is gereset naar: ${nieuwWachtwoord}. Je kunt het nu kopiëren.`);
+            toonAccounts();
+        }
+
+        function stuurWachtwoorden(modus) {
+            let accounts = [];
+            if (modus === 'geselecteerd') {
+                document.querySelectorAll('.account-checkbox:checked').forEach(checkbox => {
+                    const naam = checkbox.dataset.accountName;
+                    accounts.push(JSON.parse(localStorage.getItem('account_' + naam)));
+                });
+            } else if (modus === 'alle') {
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('account_')) {
+                        accounts.push(JSON.parse(localStorage.getItem(key)));
+                    }
+                });
+            }
+
+            if (accounts.length === 0) {
+                alert("⚠️ Geen accounts geselecteerd of geen accounts gevonden om wachtwoorden voor te versturen.");
+                return;
+            }
+
+            const emails = accounts.map(a => a.email).join(';');
+            let body = `Beste leerling,\n\nDit zijn je inloggegevens voor het leerling-rooster:\n\n`;
+
+            accounts.forEach(a => {
+                const nieuwWachtwoord = genereerWachtwoord();
+                const account = JSON.parse(localStorage.getItem('account_' + a.naam));
+                account.wachtwoord = nieuwWachtwoord;
+                localStorage.setItem('account_' + a.naam, JSON.stringify(account));
+                
+                body += `Naam: ${a.naam}\n`;
+                body += `Klas: ${a.klas}\n`;
+                body += `Wachtwoord: ${nieuwWachtwoord}\n\n`;
+            });
+
+            body += `Met vriendelijke groet,\nDe schooladministratie`;
+
+            const mailtoLink = `mailto:${emails}?subject=Inloggegevens%20Rooster&body=${encodeURIComponent(body)}`;
+            window.location.href = mailtoLink;
+        }
+
+
+        // Toetsen
+        function bewerkToets(index) {
+            const toetsen = JSON.parse(localStorage.getItem('toetsen') || '[]');
+            const toets = toetsen[index];
+            document.getElementById('editToetsId').value = index;
+            document.getElementById('editVak').value = toets.vak;
+            document.getElementById('editToetsnr').value = toets.toetsnr;
+            document.getElementById('editSoort').value = toets.soort;
+            document.getElementById('editDuur').value = toets.duur;
+            document.getElementById('editKlas').value = toets.klas;
+            document.getElementById('toetsModal').classList.remove('hidden');
+        }
+        
+        document.getElementById('editToetsForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const index = document.getElementById('editToetsId').value;
+            const toetsen = JSON.parse(localStorage.getItem('toetsen') || '[]');
+            
+            toetsen[index].vak = document.getElementById('editVak').value.trim();
+            toetsen[index].toetsnr = document.getElementById('editToetsnr').value.trim();
+            toetsen[index].soort = document.getElementById('editSoort').value.trim();
+            toetsen[index].duur = document.getElementById('editDuur').value.trim();
+            toetsen[index].klas = document.getElementById('editKlas').value.trim();
+            
+            localStorage.setItem('toetsen', JSON.stringify(toetsen));
+            document.getElementById('toetsModal').classList.add('hidden');
+            toonToetsen();
+        });
+
+        function verwijderToets(index) {
+            if (confirm("Weet je zeker dat je deze toets wilt verwijderen?")) {
+                const toetsen = JSON.parse(localStorage.getItem('toetsen') || '[]');
+                toetsen.splice(index, 1);
+                localStorage.setItem('toetsen', JSON.stringify(toetsen));
+                toonToetsen();
+            }
+        }
+
+        // Inschrijvingen
+        function verwijderInschrijving(index) {
+             if (confirm("Weet je zeker dat je deze inschrijving wilt verwijderen?")) {
+                const inschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
+                inschrijvingen.splice(index, 1);
+                localStorage.setItem('inschrijvingen', JSON.stringify(inschrijvingen));
+                toonInschrijvingen();
+            }
+        }
+
+        // --- Resetfuncties ---
+        function resetAccounts() {
+            if (!confirm("Weet u zeker dat u alle accounts wilt verwijderen? Dit kan niet ongedaan worden gemaakt.")) return;
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('account_') || key === 'actieveLeerling') {
+                    localStorage.removeItem(key);
+                }
+            });
+            alert('✅ Accounts zijn succesvol verwijderd.');
+            toonAccounts();
+        }
+
+        function resetInschrijvingen() {
+            if (!confirm("Weet u zeker dat u alle inschrijvingen wilt verwijderen? Dit kan niet ongedaan worden gemaakt.")) return;
+            localStorage.removeItem('inschrijvingen');
+            alert('✅ Inschrijvingen zijn succesvol verwijderd.');
+            toonInschrijvingen();
+        }
+
+        function resetToetsen() {
+            if (!confirm("Weet u zeker dat u alle toetsen wilt verwijderen? Dit kan niet ongedaan worden gemaakt.")) return;
+            localStorage.removeItem('toetsen');
+            alert('✅ Toetsen zijn succesvol verwijderd.');
+            toonToetsen();
+        }
+    </script>
+</body>
+</html>
