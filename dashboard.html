@@ -287,7 +287,15 @@
         const globalInschrijvingenCheckbox = document.getElementById('globalInschrijvingen');
         const geenInschrijvingenText = document.getElementById('geenInschrijvingen');
         const inschrijvingOpmerkingCoordinator = document.getElementById('inschrijvingOpmerkingCoordinator');
-
+        
+        // Nieuwe toevoegingen
+        const accountForm = document.getElementById('accountForm');
+        const toevoegFeedback = document.getElementById('toevoegFeedback');
+        const nieuweNaamInput = document.getElementById('nieuweNaam');
+        const nieuweKlasInput = document.getElementById('nieuweKlas');
+        const nieuwEmailInput = document.getElementById('nieuwEmail');
+        const nieuwWachtwoordInput = document.getElementById('nieuwWachtwoord');
+        
         let sorteerRichting = {};
 
         // Functie voor tab navigatie
@@ -320,6 +328,44 @@
             localStorage.setItem('globaleInschrijvingenGesloten', globalInschrijvingenCheckbox.checked);
             alert("Instellingen succesvol opgeslagen.");
         }
+        
+        // NIEUWE FUNCTIE: Verwerk het aanmaken van een nieuw account
+        accountForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const naam = nieuweNaamInput.value.trim();
+            const klas = nieuweKlasInput.value.trim();
+            const email = nieuwEmailInput.value.trim();
+            const wachtwoord = nieuwWachtwoordInput.value.trim();
+
+            if (!naam || !klas || !email || !wachtwoord) {
+                alert('Vul alle velden in.');
+                return;
+            }
+
+            const accountKey = `account_${naam}`;
+            if (localStorage.getItem(accountKey)) {
+                alert(`Een account met de naam "${naam}" bestaat al.`);
+                return;
+            }
+
+            const nieuwAccount = {
+                naam: naam,
+                klas: klas,
+                email: email,
+                wachtwoord: wachtwoord // In de praktijk nooit wachtwoorden lokaal opslaan
+            };
+
+            localStorage.setItem(accountKey, JSON.stringify(nieuwAccount));
+            toevoegFeedback.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toevoegFeedback.classList.add('hidden');
+            }, 3000);
+
+            accountForm.reset();
+            toonAccounts();
+        });
 
 
         // Functie om accounts te tonen
