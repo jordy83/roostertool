@@ -179,11 +179,6 @@
 
             if (mijnInschrijvingIndex !== -1) {
                 const updatedToetsen = alleInschrijvingen[mijnInschrijvingIndex].toetsen.filter(toets => toets !== toetsTitel);
-                alleInschrijvingen[mijnInschrijvingIndex].toetsen = updatedToetsen;
-                // Update ingeschrevenDoor, als alle inschrijvingen leeg zijn
-                if (updatedToetsen.length === 0) {
-                     alleInschrijvingen[mijnInschrijvingIndex].ingeschrevenDoor = 'Leerling';
-                }
                 localStorage.setItem('inschrijvingen', JSON.stringify(alleInschrijvingen));
                 toonToetsen();
             }
@@ -222,8 +217,7 @@
             const nieuweInschrijving = {
                 naam: leerlingAccount.naam,
                 klas: leerlingAccount.klas,
-                toetsen: [...ingeschrevenToetsen, ...nieuweInschrijvingen],
-                ingeschrevenDoor: 'Leerling' // Markeer inschrijving als gedaan door leerling
+                toetsen: [...ingeschrevenToetsen, ...nieuweInschrijvingen]
             };
 
             if (bestaandeInschrijvingIndex !== -1) {
