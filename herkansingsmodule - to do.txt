@@ -11,6 +11,8 @@ Dashboard:
 		Soort toets		
 		Lokaal
 		aantal lokaal op basisi van aantal leerlingen
+
+	-	Statistieken per Leerling.
 	
 	Export  toetsoverzicht pdf (totaal)
 
@@ -120,6 +122,7 @@ _Totaal: ± 7 weken (flexibel afhankelijk van teamgrootte)_
 
 
 	
+
 
 
 
