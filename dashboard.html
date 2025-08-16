@@ -12,6 +12,10 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+        .sortable-header {
+            cursor: pointer;
+            user-select: none;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 antialiased">
@@ -155,8 +159,23 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                 <div>
                     <h3 class="text-xl font-bold mb-4 text-gray-800">Inschrijvingen Overzicht</h3>
-                    <ul id="inschrijvingLijst" class="list-disc pl-5 text-gray-700 mb-4 space-y-2"></ul>
-                    <button onclick="exportCSV()" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left table-auto border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 border-b border-gray-200 text-sm font-semibold text-gray-600">
+                                    <th class="py-3 px-4 sortable-header" onclick="sorteerTabel('leerling')">Leerling</th>
+                                    <th class="py-3 px-4 sortable-header" onclick="sorteerTabel('klas')">Klas</th>
+                                    <th class="py-3 px-4 sortable-header" onclick="sorteerTabel('toets')">Toets</th>
+                                    <th class="py-3 px-4 sortable-header" onclick="sorteerTabel('ingeschrevenDoor')">Ingeschreven door</th>
+                                    <th class="py-3 px-4">Acties</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inschrijvingLijst" class="divide-y divide-gray-200">
+                                </tbody>
+                        </table>
+                    </div>
+                    <p id="geenInschrijvingen" class="text-gray-500 text-center mt-4 hidden">Nog geen inschrijvingen.</p>
+                    <button onclick="exportCSV()" class="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
                         📤 Exporteer naar CSV
                     </button>
                 </div>
@@ -244,6 +263,9 @@
         const leerlingSelect = document.getElementById('leerlingSelect');
         const toetsSelect = document.getElementById('toetsSelect');
         const globalInschrijvingenCheckbox = document.getElementById('globalInschrijvingen');
+        const geenInschrijvingenText = document.getElementById('geenInschrijvingen');
+
+        let sorteerRichting = {};
 
         // Functie voor tab navigatie
         let huidigeTab = 'accounts';
@@ -261,6 +283,7 @@
             
             if (tabId === 'inschrijvingen') {
                 laadLeerlingenEnToetsen();
+                toonInschrijvingen();
             }
         }
 
@@ -334,28 +357,57 @@
         function toonInschrijvingen() {
             const inschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
             const toetsTeller = {};
+            const losseInschrijvingen = [];
 
-            inschrijvingLijst.innerHTML = '';
-            if (inschrijvingen.length === 0) {
-                inschrijvingLijst.innerHTML = '<li>Nog geen inschrijvingen.</li>';
-            } else {
-                inschrijvingen.forEach((inschrijving, index) => {
-                    const li = document.createElement('li');
-                    li.className = "flex justify-between items-center mb-2";
-                    li.innerHTML = `
-                        <span><strong>${inschrijving.naam}</strong> (${inschrijving.klas}) heeft ingeschreven voor: <em>${inschrijving.toetsen.join(', ')}</em></span>
-                        <div class="space-x-2 flex">
-                            <span class="text-sm text-gray-500">${inschrijving.ingeschrevenDoor || 'Leerling'}</span>
-                            <button onclick="verwijderInschrijving(${index})" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Verwijderen</button>
-                        </div>
-                    `;
-                    inschrijvingLijst.appendChild(li);
-                    inschrijving.toetsen.forEach(toets => {
-                        toetsTeller[toets] = (toetsTeller[toets] || 0) + 1;
+            // Splijt de inschrijvingen op in losse regels
+            inschrijvingen.forEach(leerlingInschrijving => {
+                leerlingInschrijving.toetsen.forEach(toets => {
+                    losseInschrijvingen.push({
+                        leerling: leerlingInschrijving.naam,
+                        klas: leerlingInschrijving.klas,
+                        toets: toets,
+                        ingeschrevenDoor: leerlingInschrijving.ingeschrevenDoor || 'Leerling'
                     });
+                    toetsTeller[toets] = (toetsTeller[toets] || 0) + 1;
+                });
+            });
+
+            // Sorteer de losse inschrijvingen
+            let gesorteerdeLijst = losseInschrijvingen;
+            if (sorteerRichting.kolom) {
+                gesorteerdeLijst.sort((a, b) => {
+                    const valA = a[sorteerRichting.kolom].toLowerCase();
+                    const valB = b[sorteerRichting.kolom].toLowerCase();
+                    if (valA < valB) return sorteerRichting.richting === 'asc' ? -1 : 1;
+                    if (valA > valB) return sorteerRichting.richting === 'asc' ? 1 : -1;
+                    return 0;
                 });
             }
 
+            inschrijvingLijst.innerHTML = '';
+            if (gesorteerdeLijst.length === 0) {
+                geenInschrijvingenText.classList.remove('hidden');
+            } else {
+                geenInschrijvingenText.classList.add('hidden');
+                gesorteerdeLijst.forEach((inschrijving, index) => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50";
+                    tr.innerHTML = `
+                        <td class="py-3 px-4">${inschrijving.leerling}</td>
+                        <td class="py-3 px-4">${inschrijving.klas}</td>
+                        <td class="py-3 px-4">${inschrijving.toets}</td>
+                        <td class="py-3 px-4">${inschrijving.ingeschrevenDoor}</td>
+                        <td class="py-3 px-4">
+                            <button onclick="verwijderInschrijving('${inschrijving.leerling}', '${inschrijving.toets}')" class="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">
+                                Verwijder
+                            </button>
+                        </td>
+                    `;
+                    inschrijvingLijst.appendChild(tr);
+                });
+            }
+            
+            // Statistieken tonen
             statistiekLijst.innerHTML = '';
             Object.entries(toetsTeller).forEach(([toets, aantal]) => {
                 const li = document.createElement('li');
@@ -363,7 +415,13 @@
                 statistiekLijst.appendChild(li);
             });
         }
-        toonInschrijvingen();
+        
+        function sorteerTabel(kolom) {
+            const huidigeRichting = sorteerRichting.kolom === kolom ? sorteerRichting.richting : 'asc';
+            const nieuweRichting = huidigeRichting === 'asc' ? 'desc' : 'asc';
+            sorteerRichting = { kolom: kolom, richting: nieuweRichting };
+            toonInschrijvingen();
+        }
 
         // Populeer de selectieboxen voor handmatig inschrijven
         function laadLeerlingenEnToetsen() {
@@ -408,12 +466,14 @@
                     return;
                 }
                 leerlingInschrijving.toetsen.push(geselecteerdeToets);
+                leerlingInschrijving.ingeschrevenDoor = 'Coördinator'; // Loggen wie de inschrijving doet
             } else {
                 const leerlingData = JSON.parse(localStorage.getItem('account_' + geselecteerdeLeerling));
                 alleInschrijvingen.push({
                     naam: leerlingData.naam,
                     klas: leerlingData.klas,
-                    toetsen: [geselecteerdeToets]
+                    toetsen: [geselecteerdeToets],
+                    ingeschrevenDoor: 'Coördinator' // Loggen wie de inschrijving doet
                 });
             }
 
@@ -522,10 +582,12 @@
 
         // CSV export
         function exportCSV() {
-            let csv = "Naam,Klas,Toetsen,Inschrijver\n";
+            let csv = "Naam,Klas,Toetsen,Ingeschreven door\n";
             const inschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
             inschrijvingen.forEach(i => {
-                csv += `"${i.naam}","${i.klas}","${i.toetsen.join('; ')}","${i.ingeschrevenDoor || 'Leerling'}"\n`;
+                i.toetsen.forEach(toets => {
+                    csv += `"${i.naam}","${i.klas}","${toets}","${i.ingeschrevenDoor || 'Leerling'}"\n`;
+                });
             });
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
@@ -679,51 +741,22 @@
         }
 
         // Inschrijvingen
-        function verwijderInschrijving(index) {
-             if (confirm("Weet je zeker dat je deze inschrijving wilt verwijderen?")) {
-                const inschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
-                inschrijvingen.splice(index, 1);
-                localStorage.setItem('inschrijvingen', JSON.stringify(inschrijvingen));
-                toonInschrijvingen();
-            }
-        }
-        
-        // Handmatig inschrijven door coördinator
-        function schrijfLeerlingIn() {
-            const geselecteerdeLeerling = leerlingSelect.value;
-            const geselecteerdeToets = toetsSelect.value;
+        function verwijderInschrijving(leerlingNaam, toetsTitel) {
+            if (!confirm(`Weet je zeker dat je de inschrijving voor '${toetsTitel}' van leerling '${leerlingNaam}' wilt verwijderen?`)) return;
             
-            if (!geselecteerdeLeerling || !geselecteerdeToets) {
-                alert("⚠️ Selecteer een leerling én een toets.");
-                return;
-            }
-
             const alleInschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
-            let leerlingInschrijving = alleInschrijvingen.find(i => i.naam === geselecteerdeLeerling);
+            const inschrijvingIndex = alleInschrijvingen.findIndex(i => i.naam === leerlingNaam);
 
-            if (leerlingInschrijving) {
-                if (leerlingInschrijving.toetsen.includes(geselecteerdeToets)) {
-                    alert("⚠️ Deze leerling is al ingeschreven voor deze toets.");
-                    return;
+            if (inschrijvingIndex !== -1) {
+                const updatedToetsen = alleInschrijvingen[inschrijvingIndex].toetsen.filter(toets => toets !== toetsTitel);
+                if (updatedToetsen.length === 0) {
+                     alleInschrijvingen.splice(inschrijvingIndex, 1);
+                } else {
+                     alleInschrijvingen[inschrijvingIndex].toetsen = updatedToetsen;
                 }
-                leerlingInschrijving.toetsen.push(geselecteerdeToets);
-                leerlingInschrijving.ingeschrevenDoor = 'Coördinator'; // Loggen wie de inschrijving doet
-            } else {
-                const leerlingData = JSON.parse(localStorage.getItem('account_' + geselecteerdeLeerling));
-                alleInschrijvingen.push({
-                    naam: leerlingData.naam,
-                    klas: leerlingData.klas,
-                    toetsen: [geselecteerdeToets],
-                    ingeschrevenDoor: 'Coördinator' // Loggen wie de inschrijving doet
-                });
-            }
-
-            localStorage.setItem('inschrijvingen', JSON.stringify(alleInschrijvingen));
-            document.getElementById('inschrijvingFeedback').classList.remove('hidden');
-            setTimeout(() => {
-                document.getElementById('inschrijvingFeedback').classList.add('hidden');
+                localStorage.setItem('inschrijvingen', JSON.stringify(alleInschrijvingen));
                 toonInschrijvingen();
-            }, 1500);
+            }
         }
 
         // --- Resetfuncties ---
