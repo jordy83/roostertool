@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toetsplanner</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+  <!-- Header -->
+  <header class="bg-white shadow-md relative">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-blue-600">Toetsplanner</h1>
+      <div class="flex items-center gap-4">
+        <div id="logoutContainer"></div>
+
+        <!-- 🔒 Beheerderlogin -->
+        <div class="relative">
+          <button onclick="toggleAdminLogin()" title="Beheerderlogin"
+                  class="text-gray-400 hover:text-gray-600 text-sm">
+            🔒
+          </button>
+          <div id="adminLogin" class="hidden absolute right-0 mt-2 bg-white border border-gray-300 p-2 rounded shadow-md z-10">
+            <input type="password" id="adminWachtwoord"
+                   placeholder="Wachtwoord"
+                   class="border border-gray-300 px-2 py-1 rounded text-sm" />
+            <button onclick="loginAdmin()"
+                    class="bg-blue-500 text-white px-2 py-1 rounded text-sm ml-1 hover:bg-blue-600">
+              ➤
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Intro -->
+  <section class="py-16 text-center">
+    <div class="max-w-2xl mx-auto px-6">
+      <h2 class="text-3xl font-bold mb-4">Welkom bij de Toetsplanner</h2>
+      <p class="text-gray-600 mb-8">Plan je herkansingen eenvoudig en snel. Log in om te beginnen.</p>
+      <a href="login.html"
+         class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg text-lg hover:bg-blue-700 transition">
+         Ga naar inschrijvingen
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t py-6 mt-12">
+    <div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-500">
+      © 2025 Toetsplanner. Gemaakt door Jordy.
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    const leerling = JSON.parse(localStorage.getItem('actieveLeerling') || '{}');
+    const logoutContainer = document.getElementById('logoutContainer');
+
+    if (leerling.naam) {
+      const button = document.createElement('button');
+      button.textContent = `Uitloggen (${leerling.naam})`;
+      button.className = 'text-red-600 hover:underline';
+      button.onclick = function() {
+        localStorage.removeItem('actieveLeerling');
+        window.location.reload();
+      };
+      logoutContainer.appendChild(button);
+    }
+
+    // Beheerderlogin
+    function toggleAdminLogin() {
+      const loginBox = document.getElementById('adminLogin');
+      loginBox.classList.toggle('hidden');
+    }
+
+    function loginAdmin() {
+      const wachtwoord = document.getElementById('adminWachtwoord').value;
+      const correct = "admin123"; // 🔐 Pas dit aan naar jouw geheime wachtwoord
+
+      if (wachtwoord === correct) {
+        window.location.href = "dashboard.html";
+      } else {
+        alert("❌ Ongeldig wachtwoord.");
+      }
+    }
+  </script>
+
+</body>
+</html>

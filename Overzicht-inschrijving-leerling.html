@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mijn Inschrijvingen</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+  <!-- Header -->
+  <header class="bg-white shadow-md">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-blue-600">Mijn Inschrijvingen</h1>
+      <button id="logoutBtn" class="text-red-600 hover:underline">Uitloggen</button>
+    </div>
+  </header>
+
+  <!-- Overzicht -->
+  <section class="py-12">
+    <div class="max-w-3xl mx-auto px-6 bg-white p-8 rounded shadow">
+      <h2 id="welkomHeader" class="text-2xl font-bold mb-6 text-center">Welkom leerling</h2>
+
+      <div class="mb-6">
+        <label for="email" class="block text-sm font-medium mb-1">E-mailadres (optioneel)</label>
+        <input type="email" id="email" placeholder="voorbeeld@school.nl"
+               class="w-full border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+
+      <div id="inschrijvingenContainer" class="mb-6">
+        <h3 class="text-lg font-semibold mb-2">Jouw ingeschreven toetsen:</h3>
+        <ul id="inschrijvingenLijst" class="list-disc pl-5 text-gray-700"></ul>
+      </div>
+
+      <button onclick="verstuurEmail()"
+              class="w-full bg-blue-600 text-white py-3 rounded-lg text-lg hover:bg-blue-700">
+        Verstuur overzicht per e-mail
+      </button>
+
+      <div id="bevestiging" class="mt-6 hidden text-green-600 text-center font-semibold">
+        ✅ E-mail is voorbereid!
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t py-6 mt-12">
+    <div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-500">
+      © 2025 Toetsplanner. Gemaakt door Jordy.
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // Check login
+    const leerlingData = JSON.parse(localStorage.getItem('actieveLeerling') || '{}');
+    if (!leerlingData.naam || !leerlingData.klas) {
+      window.location.href = 'login.html';
+    }
+
+    // Vul leerlinggegevens
+    document.getElementById('welkomHeader').innerHTML = `Welkom <span class="text-blue-600">${leerlingData.naam}</span> uit klas <span class="text-blue-600">${leerlingData.klas}</span>`;
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('actieveLeerling');
+      window.location.href = 'index.html';
+    });
+
+    // Toon inschrijvingen
+    const alleInschrijvingen = JSON.parse(localStorage.getItem('inschrijvingen') || '[]');
+    const leerlingInschrijvingen = alleInschrijvingen.filter(i => i.naam === leerlingData.naam && i.klas === leerlingData.klas);
+    const lijst = document.getElementById('inschrijvingenLijst');
+
+    if (leerlingInschrijvingen.length === 0) {
+      lijst.innerHTML = '<li>Je hebt nog geen inschrijvingen gedaan.</li>';
+    } else {
+      leerlingInschrijvingen.forEach((inschrijving, index) => {
+        inschrijving.toetsen.forEach(toets => {
+          const item = document.createElement('li');
+          item.textContent = `${toets}`;
+          lijst.appendChild(item);
+        });
+      });
+    }
+
+    // E-mailfunctie
+    function verstuurEmail() {
+      const email = document.getElementById('email').value.trim();
+      if (!email) {
+        alert("⚠️ Vul een geldig e-mailadres in.");
+        return;
+      }
+
+      const onderwerp = encodeURIComponent("Mijn toetsinschrijvingen");
+      const body = encodeURIComponent(`Beste ${leerlingData.naam},\n\nHierbij jouw toetsinschrijvingen:\n\n` +
+        leerlingInschrijvingen.flatMap(i => i.toetsen).map(t => `• ${t}`).join('\n') +
+        `\n\nMet vriendelijke groet,\nToetsplanner`);
+
+      const mailtoLink = `mailto:${email}?subject=${onderwerp}&body=${body}`;
+      window.location.href = mailtoLink;
+
+      document.getElementById('bevestiging').classList.remove('hidden');
+    }
+  </script>
+
+</body>
+</html>
